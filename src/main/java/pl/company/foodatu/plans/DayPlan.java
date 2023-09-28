@@ -81,4 +81,10 @@ public final class DayPlan {
     public Long getId() {
         return id;
     }
+
+    public Double getKcal() {
+        return plannedMeals.stream()
+                .map(PlannedMeal::getKCal)
+                .reduce(0.0, Double::sum);
+    }
 }

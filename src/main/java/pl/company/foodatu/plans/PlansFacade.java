@@ -1,6 +1,7 @@
 package pl.company.foodatu.plans;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PlansFacade {
@@ -12,20 +13,26 @@ public class PlansFacade {
     }
 
     public void addMealToPlan(Meal meal, UserId user, LocalDate day) {
+
         var dayPlan = repository
                 .find(user, day)
-                .map(it -> it.withMeal(new PlannedMeal(meal.name())))
-                .orElse(new DayPlan(new User(user.id()), day, List.of(new PlannedMeal(meal.name()))));
+                .orElse(new DayPlan(new User(user.id()), day, new ArrayList<>()));
+
+        if (dayPlan.plannedMeals().size() >= 6) {
+            throw new TooManyMealsInDayPlanException();
+        }
+
+        dayPlan.withMeal(new PlannedMeal(meal.name(), meal.carbons(), meal.proteins(), meal.fat()));
         repository.save(dayPlan);
     }
 
     public PlanResponse getPlanForDay(UserId user, LocalDate day) {
         return repository.find(user, day)
-                .map(it -> new PlanResponse(getPlannedMeals(it)))
+                .map(dayPlan -> new PlanResponse(getPlannedMeals(dayPlan), dayPlan.getKcal()))
                 .orElse(PlanResponse.empty());
     }
 
-    private static List<PlannedMealResponse> getPlannedMeals(DayPlan it) {
-        return it.plannedMeals().stream().map(i -> new PlannedMealResponse(i.getName())).toList();
+    private static List<PlannedMealResponse> getPlannedMeals(DayPlan dayPlan) {
+        return dayPlan.plannedMeals().stream().map(i -> new PlannedMealResponse(i.getName())).toList();
     }
 }

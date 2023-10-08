@@ -31,7 +31,7 @@ class PlannedMeal {
         return name;
     }
 
-    public Double getKCal() {
+    public Double calculateKCal() {
         return (4 * proteins) + (4 * carbons) + (9 * fat);
     }
 }

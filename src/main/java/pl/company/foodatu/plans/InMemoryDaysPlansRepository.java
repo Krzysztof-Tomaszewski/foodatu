@@ -11,7 +11,7 @@ class InMemoryDaysPlansRepository implements DaysPlansRepository {
     @Override
     public DayPlan save(DayPlan plan) {
         var plans = Stream.concat(
-                        memory.getOrDefault(plan.user(), List.of())
+                        memory.getOrDefault(new UserId(plan.user().getId()), List.of())
                                 .stream()
                                 .filter(dayPlan -> !dayPlan.localDate().isEqual(plan.localDate())),
                         Stream.of(plan)

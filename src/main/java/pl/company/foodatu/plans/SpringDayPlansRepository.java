@@ -11,6 +11,6 @@ import java.util.Optional;
 @Repository
 interface SpringDayPlansRepository extends DaysPlansRepository, CrudRepository<DayPlan, Long> {
 
-    @Query("SELECT d FROM DayPlan d WHERE d.user = :userId.id) AND d.localDate = :date")
-    Optional<DayPlan> find(@Param("userId") UserId user, @Param("date") LocalDate date);
+    @Query("SELECT d FROM DayPlan d WHERE d.user = :#{#user.id} AND d.localDate = :date")
+    Optional<DayPlan> find(@Param("user") UserId user, @Param("date") LocalDate date);
 }

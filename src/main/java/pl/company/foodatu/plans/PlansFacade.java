@@ -18,17 +18,13 @@ public class PlansFacade {
                 .find(user, day)
                 .orElse(new DayPlan(new User(user.id()), day, new ArrayList<>()));
 
-        if (dayPlan.plannedMeals().size() >= 6) {
-            throw new TooManyMealsInDayPlanException();
-        }
-
-        dayPlan.withMeal(new PlannedMeal(meal.name(), meal.carbons(), meal.proteins(), meal.fat()));
+        dayPlan.addMeal(new PlannedMeal(meal.name(), meal.carbons(), meal.proteins(), meal.fat()));
         repository.save(dayPlan);
     }
 
     public PlanResponse getPlanForDay(UserId user, LocalDate day) {
         return repository.find(user, day)
-                .map(dayPlan -> new PlanResponse(getPlannedMeals(dayPlan), dayPlan.getKcal()))
+                .map(dayPlan -> new PlanResponse(getPlannedMeals(dayPlan), dayPlan.calculateKCal()))
                 .orElse(PlanResponse.empty());
     }
 

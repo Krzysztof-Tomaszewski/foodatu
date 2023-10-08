@@ -8,7 +8,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class PlansTest {
+class PlansTest {
 
     private Meal SANDWICH_WITH_CHEESE = new Meal("Kanapka z serem", 20.0, 10.0, 10.5);
     private Meal SANDWICH_WITH_HAM = new Meal("Kanapka z szynką", 25.0, 20.0, 12.5);
@@ -50,8 +50,11 @@ public class PlansTest {
         //when
         Runnable runnable = () -> plansFacade.addMealToPlan(SANDWICH_WITH_CHEESE, USER, TODAY);
 
+
         //then
         Assertions.assertThrows(TooManyMealsInDayPlanException.class, runnable::run);
+        PlanResponse plan = plansFacade.getPlanForDay(USER, TODAY);
+        assertEquals(6, plan.plannedMeals().size());
     }
 
     @Test

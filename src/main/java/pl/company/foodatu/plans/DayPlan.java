@@ -11,6 +11,7 @@ import java.util.Objects;
 
 @Entity
 public final class DayPlan {
+    public static final int MAX_MEALS = 6;
     @ManyToOne
     private User user;
     private LocalDate localDate;
@@ -33,7 +34,12 @@ public final class DayPlan {
     public DayPlan() {
     }
 
-    DayPlan withMeal(PlannedMeal plannedMeal) {
+    DayPlan addMeal(PlannedMeal plannedMeal) {
+
+        if (plannedMeals().size() >= MAX_MEALS) {
+            throw new TooManyMealsInDayPlanException();
+        }
+
         plannedMeals.add(plannedMeal);
         return this;
     }
@@ -82,9 +88,9 @@ public final class DayPlan {
         return id;
     }
 
-    public Double getKcal() {
+    public Double calculateKCal() {
         return plannedMeals.stream()
-                .map(PlannedMeal::getKCal)
+                .map(PlannedMeal::calculateKCal)
                 .reduce(0.0, Double::sum);
     }
 }

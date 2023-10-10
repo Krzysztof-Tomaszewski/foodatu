@@ -1,4 +1,4 @@
-package pl.company.foodatu.plans;
+package pl.company.foodatu.plans.dto;
 
 import java.util.List;
 
@@ -7,11 +7,11 @@ public record PlanResponse(
         Double kCal
 ) {
 
-    static PlanResponse empty() {
+    public static PlanResponse empty() {
         return new PlanResponse(List.of(), 0.0);
     }
 
-    Double getKCal() {
+    public Double getKCal() {
         return kCal;
     }
 

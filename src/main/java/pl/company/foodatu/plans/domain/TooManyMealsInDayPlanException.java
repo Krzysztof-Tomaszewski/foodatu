@@ -1,4 +1,4 @@
-package pl.company.foodatu.plans;
+package pl.company.foodatu.plans.domain;
 
 public class TooManyMealsInDayPlanException extends RuntimeException{
 

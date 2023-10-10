@@ -1,4 +1,6 @@
-package pl.company.foodatu.plans;
+package pl.company.foodatu.plans.domain;
+
+import pl.company.foodatu.plans.dto.UserId;
 
 import java.time.LocalDate;
 import java.util.Optional;

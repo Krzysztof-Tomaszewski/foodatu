@@ -1,9 +1,9 @@
-package pl.company.foodatu.plans;
+package pl.company.foodatu.plans.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
+@Table(name = "users")
 class User {
 
     @Id

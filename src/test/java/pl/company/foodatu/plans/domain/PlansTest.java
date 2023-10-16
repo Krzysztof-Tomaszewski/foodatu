@@ -4,11 +4,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import pl.company.foodatu.plans.dto.PlanResponse;
 import pl.company.foodatu.plans.dto.PlannedMealResponse;
-import pl.company.foodatu.plans.utils.PlansTestUtils;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static pl.company.foodatu.plans.utils.PlansTestUtils.SANDWICH_WITH_CHEESE;
+import static pl.company.foodatu.plans.utils.PlansTestUtils.SANDWICH_WITH_HAM;
+import static pl.company.foodatu.plans.utils.PlansTestUtils.TODAY;
+import static pl.company.foodatu.plans.utils.PlansTestUtils.USER;
 
 class PlansTest {
 
@@ -17,10 +20,10 @@ class PlansTest {
     @Test
     void shouldAddMealToDayPlan() {
         //when
-        plansFacade.addMealToPlan(PlansTestUtils.SANDWICH_WITH_CHEESE, PlansTestUtils.USER, PlansTestUtils.TODAY);
+        plansFacade.addMealToPlan(SANDWICH_WITH_CHEESE, USER, TODAY);
 
         //then
-        var plan = plansFacade.getPlanForDay(PlansTestUtils.USER, PlansTestUtils.TODAY);
+        var plan = plansFacade.getPlanForDay(USER, TODAY);
         List<PlannedMealResponse> plannedMeals = plan.plannedMeals();
         assertEquals(plannedMeals, List.of(new PlannedMealResponse("Kanapka z serem")));
     }
@@ -28,11 +31,11 @@ class PlansTest {
     @Test
     void shouldAdd2MealsToDayPlan() {
         //when
-        plansFacade.addMealToPlan(PlansTestUtils.SANDWICH_WITH_CHEESE, PlansTestUtils.USER, PlansTestUtils.TODAY);
-        plansFacade.addMealToPlan(PlansTestUtils.SANDWICH_WITH_HAM, PlansTestUtils.USER, PlansTestUtils.TODAY);
+        plansFacade.addMealToPlan(SANDWICH_WITH_CHEESE, USER, TODAY);
+        plansFacade.addMealToPlan(SANDWICH_WITH_HAM, USER, TODAY);
 
         //then
-        var plan = plansFacade.getPlanForDay(PlansTestUtils.USER, PlansTestUtils.TODAY);
+        var plan = plansFacade.getPlanForDay(USER, TODAY);
         List<PlannedMealResponse> plannedMeals = plan.plannedMeals();
         assertEquals(plannedMeals, List.of(new PlannedMealResponse("Kanapka z serem"), new PlannedMealResponse("Kanapka z szynką")));
     }
@@ -41,27 +44,27 @@ class PlansTest {
     void shouldNotAllowToAddMoreThan6MealsToDayPlan() {
         //given
         for (int i = 0; i < 6; i++) {
-            plansFacade.addMealToPlan(PlansTestUtils.SANDWICH_WITH_CHEESE, PlansTestUtils.USER, PlansTestUtils.TODAY);
+            plansFacade.addMealToPlan(SANDWICH_WITH_CHEESE, USER, TODAY);
         }
 
         //when
-        Runnable runnable = () -> plansFacade.addMealToPlan(PlansTestUtils.SANDWICH_WITH_CHEESE, PlansTestUtils.USER, PlansTestUtils.TODAY);
+        Runnable runnable = () -> plansFacade.addMealToPlan(SANDWICH_WITH_CHEESE, USER, TODAY);
 
 
         //then
         Assertions.assertThrows(TooManyMealsInDayPlanException.class, runnable::run);
-        PlanResponse plan = plansFacade.getPlanForDay(PlansTestUtils.USER, PlansTestUtils.TODAY);
+        PlanResponse plan = plansFacade.getPlanForDay(USER, TODAY);
         assertEquals(6, plan.plannedMeals().size());
     }
 
     @Test
     void shouldTellHowManyKcalInDayPlan() {
         //given
-        plansFacade.addMealToPlan(PlansTestUtils.SANDWICH_WITH_CHEESE, PlansTestUtils.USER, PlansTestUtils.TODAY);
-        plansFacade.addMealToPlan(PlansTestUtils.SANDWICH_WITH_HAM, PlansTestUtils.USER, PlansTestUtils.TODAY);
+        plansFacade.addMealToPlan(SANDWICH_WITH_CHEESE, USER, TODAY);
+        plansFacade.addMealToPlan(SANDWICH_WITH_HAM, USER, TODAY);
 
         //when
-        Double kCal = plansFacade.getPlanForDay(PlansTestUtils.USER, PlansTestUtils.TODAY).getKCal();
+        Double kCal = plansFacade.getPlanForDay(USER, TODAY).getKCal();
 
         //then
         Assertions.assertEquals(214.5 + 292.5, kCal);

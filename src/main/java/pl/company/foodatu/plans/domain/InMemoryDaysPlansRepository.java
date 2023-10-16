@@ -3,7 +3,11 @@ package pl.company.foodatu.plans.domain;
 import pl.company.foodatu.plans.dto.UserId;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 class InMemoryDaysPlansRepository implements DaysPlansRepository {

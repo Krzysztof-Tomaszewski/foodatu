@@ -21,13 +21,13 @@ public class PlansClient {
 
     public PlanResponse getPlanForDay(String userId, LocalDate day) {
         return restTemplate.getForObject(
-                BASE_PATH + "/" + userId + "/plans/" + day,
+                BASE_PATH + "/" + userId + "/plans/" + day + "/meals",
                 PlanResponse.class);
     }
 
     public PlanResponse addMealToPlan(Meal meal, String userId, LocalDate day) {
         return restTemplate.postForObject(
-                BASE_PATH + "/" + userId + "/plans/" + day,
+                BASE_PATH + "/" + userId + "/plans/" + day + "/meals",
                 meal,
                 PlanResponse.class);
     }

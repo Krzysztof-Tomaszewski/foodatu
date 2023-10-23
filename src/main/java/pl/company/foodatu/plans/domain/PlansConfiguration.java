@@ -1,4 +1,4 @@
-package pl.company.foodatu.plans;
+package pl.company.foodatu.plans.domain;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,19 +1,19 @@
-package pl.company.foodatu.plans;
+package pl.company.foodatu.plans.domain;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import pl.company.foodatu.plans.dto.PlanResponse;
+import pl.company.foodatu.plans.dto.PlannedMealResponse;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static pl.company.foodatu.plans.utils.PlansTestUtils.SANDWICH_WITH_CHEESE;
+import static pl.company.foodatu.plans.utils.PlansTestUtils.SANDWICH_WITH_HAM;
+import static pl.company.foodatu.plans.utils.PlansTestUtils.TODAY;
+import static pl.company.foodatu.plans.utils.PlansTestUtils.USER;
 
 class PlansTest {
-
-    private Meal SANDWICH_WITH_CHEESE = new Meal("Kanapka z serem", 20.0, 10.0, 10.5);
-    private Meal SANDWICH_WITH_HAM = new Meal("Kanapka z szynką", 25.0, 20.0, 12.5);
-    private UserId USER = new UserId("0001");
-    private LocalDate TODAY = LocalDate.of(2023, 9, 20);
 
     private PlansFacade plansFacade = new PlansConfiguration().inMemoryFacade();
 

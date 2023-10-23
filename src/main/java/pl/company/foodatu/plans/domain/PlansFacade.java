@@ -1,4 +1,9 @@
-package pl.company.foodatu.plans;
+package pl.company.foodatu.plans.domain;
+
+import pl.company.foodatu.plans.dto.Meal;
+import pl.company.foodatu.plans.dto.PlanResponse;
+import pl.company.foodatu.plans.dto.PlannedMealResponse;
+import pl.company.foodatu.plans.dto.UserId;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -12,14 +17,15 @@ public class PlansFacade {
         this.repository = repository;
     }
 
-    public void addMealToPlan(Meal meal, UserId user, LocalDate day) {
+    public PlanResponse addMealToPlan(Meal meal, UserId user, LocalDate day) {
 
         var dayPlan = repository
                 .find(user, day)
                 .orElse(new DayPlan(new User(user.id()), day, new ArrayList<>()));
 
         dayPlan.addMeal(new PlannedMeal(meal.name(), meal.carbons(), meal.proteins(), meal.fat()));
-        repository.save(dayPlan);
+        DayPlan savedPlan = repository.save(dayPlan);
+        return new PlanResponse(getPlannedMeals(savedPlan), savedPlan.calculateKCal());
     }
 
     public PlanResponse getPlanForDay(UserId user, LocalDate day) {

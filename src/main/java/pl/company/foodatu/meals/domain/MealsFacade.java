@@ -1,5 +1,6 @@
 package pl.company.foodatu.meals.domain;
 
+import pl.company.foodatu.common.exception.ResourceNotFoundException;
 import pl.company.foodatu.meals.dto.MealCreateDTO;
 import pl.company.foodatu.meals.dto.MealResponse;
 import pl.company.foodatu.meals.dto.StdProductCreateDTO;
@@ -7,7 +8,7 @@ import pl.company.foodatu.meals.dto.StdProductResponse;
 
 import java.util.List;
 
-class MealsFacade {
+public class MealsFacade {
 
     private final MealsRepository mealsRepository;
     private final StdProductsRepository stdProductsRepository;
@@ -22,7 +23,7 @@ class MealsFacade {
         return new StdProductResponse(savedStdProduct.getId(), savedStdProduct.getName());
     }
 
-    public List<StdProductResponse> getProducts() {
+    public List<StdProductResponse> getStdProducts() {
         return stdProductsRepository.findAll().stream()
                 .map(stdProduct -> new StdProductResponse(stdProduct.getId(), stdProduct.getName()))
                 .toList();
@@ -31,7 +32,8 @@ class MealsFacade {
     public MealResponse addMeal(MealCreateDTO meal) {
         List<Product> products = meal.products().stream()
                 .map(productCreateDTO -> {
-                    StdProduct stdProduct = stdProductsRepository.findById(productCreateDTO.id()).orElseThrow(RuntimeException::new);
+                    StdProduct stdProduct = stdProductsRepository.findById(productCreateDTO.id())
+                            .orElseThrow(() -> new ResourceNotFoundException("Could not find product with id: " + productCreateDTO.id()));
                     return new Product(stdProduct, productCreateDTO.weight());
                 })
                 .toList();

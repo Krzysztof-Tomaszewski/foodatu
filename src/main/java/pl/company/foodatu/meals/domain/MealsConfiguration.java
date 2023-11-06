@@ -8,13 +8,13 @@ import org.springframework.context.annotation.Profile;
 class MealsConfiguration {
     @Bean
     @Profile("local")
-    MealsFacade inMemoryFacade() {
+    MealsFacade mealsInMemoryFacade() {
         return new MealsFacade(new InMemoryMealsRepository(), new InMemoryStdProductsRepository());
     }
 
     @Bean
     @Profile("!local")
-    MealsFacade realFacade(MealsRepository repository, StdProductsRepository stdProductsRepository) {
+    MealsFacade mealsRealFacade(MealsRepository repository, StdProductsRepository stdProductsRepository) {
         return new MealsFacade(repository, stdProductsRepository);
     }
 }

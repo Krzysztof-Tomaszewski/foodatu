@@ -1,15 +1,23 @@
 package pl.company.foodatu.meals.domain;
 
 import org.junit.jupiter.api.Test;
+import pl.company.foodatu.common.exception.ResourceNotFoundException;
 import pl.company.foodatu.meals.dto.MealCreateDTO;
 import pl.company.foodatu.meals.dto.MealResponse;
+import pl.company.foodatu.meals.dto.NegativeNutritionValuesException;
+import pl.company.foodatu.meals.dto.NegativeProductsWeightException;
+import pl.company.foodatu.meals.dto.Nutrition;
 import pl.company.foodatu.meals.dto.ProductCreateDTO;
+import pl.company.foodatu.meals.dto.StdProductCreateDTO;
 import pl.company.foodatu.meals.dto.StdProductResponse;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static pl.company.foodatu.meals.utils.MealsTestUtils.BREAD;
 import static pl.company.foodatu.meals.utils.MealsTestUtils.BUTTER;
@@ -18,14 +26,14 @@ import static pl.company.foodatu.meals.utils.MealsTestUtils.HAM;
 
 class MealsTest {
 
-    private MealsFacade mealsFacade = new MealsConfiguration().inMemoryFacade();
+    private MealsFacade mealsFacade = new MealsConfiguration().mealsInMemoryFacade();
 
     @Test
     void shouldAdd2StdProductsAndReturnListContainingTheseProducts() {
         //when
         StdProductResponse breadProductResponse = mealsFacade.addStdProduct(BREAD);
         StdProductResponse butterProductResponse = mealsFacade.addStdProduct(BUTTER);
-        List<StdProductResponse> products = mealsFacade.getProducts();
+        List<StdProductResponse> products = mealsFacade.getStdProducts();
 
         //then
         assertNotNull(breadProductResponse.id());
@@ -66,16 +74,59 @@ class MealsTest {
 
     @Test
     void shouldNotAllowToAddMealContainingMoreThan10Products() {
+        //given
+        List<ProductCreateDTO> productCreateDTOS = new ArrayList<>();
+        for (int i = 0; i < 11; i++) {
+            StdProductResponse stdProductResponse = mealsFacade.addStdProduct(BREAD);
+            productCreateDTOS.add(new ProductCreateDTO(stdProductResponse.id(), 100.0));
+        }
 
+        //when
+        Runnable runnable = () -> mealsFacade.addMeal(new MealCreateDTO("test", productCreateDTOS));
+
+        //then
+        assertThrows(TooManyProductsInOneMealException.class, runnable::run);
+        List<MealResponse> meals = mealsFacade.getMeals();
+        assertTrue(meals.isEmpty());
     }
 
     @Test
     void shouldNotAllowToAddMealContainingProductWithNegativeWeight() {
+        //given
+        StdProductResponse stdProductResponse = mealsFacade.addStdProduct(BREAD);
+        ProductCreateDTO productCreateDTO = new ProductCreateDTO(stdProductResponse.id(), -1.0);
 
+        //when
+        Runnable runnable = () -> mealsFacade.addMeal(new MealCreateDTO("test", List.of(productCreateDTO)));
+
+        //then
+        assertThrows(NegativeProductsWeightException.class, runnable::run);
+        List<MealResponse> meals = mealsFacade.getMeals();
+        assertTrue(meals.isEmpty());
+    }
+
+    @Test
+    void shouldNotAllowToAddMealContainingProductWhichDoesNotExistInDb() {
+        //given
+        ProductCreateDTO productCreateDTO = new ProductCreateDTO(UUID.randomUUID(), 1.0);
+
+        //when
+        Runnable runnable = () -> mealsFacade.addMeal(new MealCreateDTO("test", List.of(productCreateDTO)));
+
+        //then
+        assertThrows(ResourceNotFoundException.class, runnable::run);
+        List<MealResponse> meals = mealsFacade.getMeals();
+        assertTrue(meals.isEmpty());
     }
 
     @Test
     void shouldNotAllowToAddStdProductWithNegativeNutrition() {
+        //when
+        Runnable runnable = () -> mealsFacade.addStdProduct(new StdProductCreateDTO("test", new Nutrition(1, 1, -1)));
 
+        //then
+        assertThrows(NegativeNutritionValuesException.class, runnable::run);
+        List<StdProductResponse> stdProducts = mealsFacade.getStdProducts();
+        assertTrue(stdProducts.isEmpty());
     }
 }

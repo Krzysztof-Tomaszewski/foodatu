@@ -14,6 +14,8 @@ import java.util.UUID;
 @Entity
 class Meal {
 
+    static final int MAX_PRODUCTS = 10;
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -21,7 +23,15 @@ class Meal {
     @OneToMany(cascade = CascadeType.ALL)
     private List<Product> products;
 
-    Meal (String name, List<Product> products) {
+    private Meal() {
+    }
+
+    Meal(String name, List<Product> products) {
+
+        if (products.size() > MAX_PRODUCTS) {
+            throw new TooManyProductsInOneMealException();
+        }
+
         this.name = name;
         this.products = products;
     }

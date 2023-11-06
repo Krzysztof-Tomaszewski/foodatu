@@ -18,6 +18,9 @@ class StdProduct {
     private Double carbons; //per 100g
     private Double fat; //per 100g
 
+    private StdProduct() {
+    }
+
     StdProduct(StdProductCreateDTO stdProductCreateDTO) {
         this.name = stdProductCreateDTO.name();
         this.proteins = stdProductCreateDTO.nutritionPer100g().proteins();

@@ -1,4 +1,6 @@
 package pl.company.foodatu.meals.dto;
 
-public record MealResponse(String name) {
+import java.util.UUID;
+
+public record MealResponse(UUID id, String name) {
 }

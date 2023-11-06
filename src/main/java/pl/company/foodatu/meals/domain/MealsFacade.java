@@ -10,24 +10,38 @@ import java.util.List;
 class MealsFacade {
 
     private final MealsRepository mealsRepository;
+    private final StdProductsRepository stdProductsRepository;
 
-    public MealsFacade(MealsRepository mealsRepository) {
+    public MealsFacade(MealsRepository mealsRepository, StdProductsRepository stdProductsRepository) {
         this.mealsRepository = mealsRepository;
-    }
-
-    public MealResponse addMeal(MealCreateDTO meal) {
-        return null;
+        this.stdProductsRepository = stdProductsRepository;
     }
 
     public StdProductResponse addStdProduct(StdProductCreateDTO stdProduct) {
-        return null;
-    }
-
-    public List<MealResponse> getMeals() {
-        return null;
+        StdProduct savedStdProduct = stdProductsRepository.save(new StdProduct(stdProduct));
+        return new StdProductResponse(savedStdProduct.getId(), savedStdProduct.getName());
     }
 
     public List<StdProductResponse> getProducts() {
-        return null;
+        return stdProductsRepository.findAll().stream()
+                .map(stdProduct -> new StdProductResponse(stdProduct.getId(), stdProduct.getName()))
+                .toList();
+    }
+
+    public MealResponse addMeal(MealCreateDTO meal) {
+        List<Product> products = meal.products().stream()
+                .map(productCreateDTO -> {
+                    StdProduct stdProduct = stdProductsRepository.findById(productCreateDTO.id()).orElseThrow(RuntimeException::new);
+                    return new Product(stdProduct, productCreateDTO.weight());
+                })
+                .toList();
+        Meal savedMeal = mealsRepository.save(new Meal(meal.name(), products));
+        return new MealResponse(savedMeal.getId(), savedMeal.getName());
+    }
+
+    public List<MealResponse> getMeals() {
+        return mealsRepository.findAll().stream()
+                .map(meal -> new MealResponse(meal.getId(), meal.getName()))
+                .toList();
     }
 }

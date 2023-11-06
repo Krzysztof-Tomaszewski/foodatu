@@ -9,12 +9,12 @@ class MealsConfiguration {
     @Bean
     @Profile("local")
     MealsFacade inMemoryFacade() {
-        return new MealsFacade(new InMemoryMealsRepository());
+        return new MealsFacade(new InMemoryMealsRepository(), new InMemoryStdProductsRepository());
     }
 
     @Bean
     @Profile("!local")
-    MealsFacade realFacade(MealsRepository repository) {
-        return new MealsFacade(repository);
+    MealsFacade realFacade(MealsRepository repository, StdProductsRepository stdProductsRepository) {
+        return new MealsFacade(repository, stdProductsRepository);
     }
 }

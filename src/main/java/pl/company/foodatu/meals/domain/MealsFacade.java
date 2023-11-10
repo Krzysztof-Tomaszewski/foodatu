@@ -1,5 +1,6 @@
 package pl.company.foodatu.meals.domain;
 
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import pl.company.foodatu.common.exception.ResourceNotFoundException;
@@ -20,7 +21,7 @@ public class MealsFacade {
         this.stdProductsRepository = stdProductsRepository;
     }
 
-    public StdProductResponse addStdProduct(StdProductCreateDTO stdProduct) {
+    public StdProductResponse addStdProduct(@Valid StdProductCreateDTO stdProduct) {
         StdProduct savedStdProduct = stdProductsRepository.save(new StdProduct(stdProduct));
         return new StdProductResponse(savedStdProduct.getId(), savedStdProduct.getName());
     }

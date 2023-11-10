@@ -5,8 +5,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
-import pl.company.foodatu.meals.dto.NegativeProductsWeightException;
+import pl.company.foodatu.meals.dto.NullOrNegativeProductsWeightException;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -22,10 +23,11 @@ class Product {
     private Product() {
     }
 
-    Product(StdProduct stdProduct, double weight) {
+    Product(StdProduct stdProduct, Double weight) {
+        Objects.requireNonNull(stdProduct);
 
-        if (weight < 0) {
-            throw new NegativeProductsWeightException();
+        if (weight == null || weight < 0) {
+            throw new NullOrNegativeProductsWeightException();
         }
 
         this.stdProduct = stdProduct;

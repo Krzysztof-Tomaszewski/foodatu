@@ -1,13 +1,14 @@
 package pl.company.foodatu.meals.dto;
 
 public record Nutrition(
-        double carbons,
-        double proteins,
-        double fat
+        Double carbons,
+        Double proteins,
+        Double fat
 ) {
     public Nutrition {
-        if (carbons < 0 || proteins < 0 || fat < 0) {
-            throw new NegativeNutritionValuesException();
+        if (carbons == null || proteins == null  || fat == null  ||
+                carbons < 0 || proteins < 0 || fat < 0) {
+            throw new NullOrNegativeNutritionValuesException();
         }
     }
 }

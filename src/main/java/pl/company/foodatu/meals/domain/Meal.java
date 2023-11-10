@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -26,6 +27,12 @@ class Meal {
     }
 
     Meal(String name, List<Product> products) {
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(products);
+
+        if(products.isEmpty()) {
+            throw new MealWithZeroProductsException();
+        }
 
         if (products.size() > MAX_PRODUCTS) {
             throw new TooManyProductsInOneMealException();

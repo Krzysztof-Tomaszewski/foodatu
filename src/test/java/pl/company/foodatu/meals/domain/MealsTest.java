@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 import pl.company.foodatu.common.exception.ResourceNotFoundException;
 import pl.company.foodatu.meals.dto.MealCreateDTO;
 import pl.company.foodatu.meals.dto.MealResponse;
-import pl.company.foodatu.meals.dto.NegativeNutritionValuesException;
-import pl.company.foodatu.meals.dto.NegativeProductsWeightException;
+import pl.company.foodatu.meals.dto.NullOrNegativeNutritionValuesException;
+import pl.company.foodatu.meals.dto.NullOrNegativeProductsWeightException;
 import pl.company.foodatu.meals.dto.Nutrition;
 import pl.company.foodatu.meals.dto.ProductCreateDTO;
 import pl.company.foodatu.meals.dto.StdProductCreateDTO;
@@ -100,7 +100,33 @@ class MealsTest {
         Runnable runnable = () -> mealsFacade.addMeal(new MealCreateDTO("test", List.of(productCreateDTO)));
 
         //then
-        assertThrows(NegativeProductsWeightException.class, runnable::run);
+        assertThrows(NullOrNegativeProductsWeightException.class, runnable::run);
+        List<MealResponse> meals = mealsFacade.getMeals().getContent();
+        assertTrue(meals.isEmpty());
+    }
+
+    @Test
+    void shouldNotAllowToAddMealContainingProductWithoutWeight() {
+        //given
+        StdProductResponse stdProductResponse = mealsFacade.addStdProduct(BREAD);
+        ProductCreateDTO productCreateDTO = new ProductCreateDTO(stdProductResponse.id(), null);
+
+        //when
+        Runnable runnable = () -> mealsFacade.addMeal(new MealCreateDTO("test", List.of(productCreateDTO)));
+
+        //then
+        assertThrows(NullOrNegativeProductsWeightException.class, runnable::run);
+        List<MealResponse> meals = mealsFacade.getMeals().getContent();
+        assertTrue(meals.isEmpty());
+    }
+
+    @Test
+    void shouldNotAllowToAddMealContainingEmptyProducts() {
+        //when
+        Runnable runnable = () -> mealsFacade.addMeal(new MealCreateDTO("test", new ArrayList<>()));
+
+        //then
+        assertThrows(MealWithZeroProductsException.class, runnable::run);
         List<MealResponse> meals = mealsFacade.getMeals().getContent();
         assertTrue(meals.isEmpty());
     }
@@ -122,10 +148,21 @@ class MealsTest {
     @Test
     void shouldNotAllowToAddStdProductWithNegativeNutrition() {
         //when
-        Runnable runnable = () -> mealsFacade.addStdProduct(new StdProductCreateDTO("test", new Nutrition(1, 1, -1)));
+        Runnable runnable = () -> mealsFacade.addStdProduct(new StdProductCreateDTO("test", new Nutrition(1.0, 1.0, -1.0)));
 
         //then
-        assertThrows(NegativeNutritionValuesException.class, runnable::run);
+        assertThrows(NullOrNegativeNutritionValuesException.class, runnable::run);
+        List<StdProductResponse> stdProducts = mealsFacade.getStdProducts().getContent();
+        assertTrue(stdProducts.isEmpty());
+    }
+
+    @Test
+    void shouldNotAllowToAddStdProductWithNullNutritionValue() {
+        //when
+        Runnable runnable = () -> mealsFacade.addStdProduct(new StdProductCreateDTO("test", new Nutrition(1.0, null, 1.0)));
+
+        //then
+        assertThrows(NullOrNegativeNutritionValuesException.class, runnable::run);
         List<StdProductResponse> stdProducts = mealsFacade.getStdProducts().getContent();
         assertTrue(stdProducts.isEmpty());
     }

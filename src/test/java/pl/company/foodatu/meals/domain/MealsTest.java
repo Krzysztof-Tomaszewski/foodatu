@@ -33,7 +33,7 @@ class MealsTest {
         //when
         StdProductResponse breadProductResponse = mealsFacade.addStdProduct(BREAD);
         StdProductResponse butterProductResponse = mealsFacade.addStdProduct(BUTTER);
-        List<StdProductResponse> products = mealsFacade.getStdProducts();
+        List<StdProductResponse> products = mealsFacade.getStdProducts().getContent();
 
         //then
         assertNotNull(breadProductResponse.id());
@@ -62,7 +62,7 @@ class MealsTest {
                 new ProductCreateDTO(breadProductResponse.id(), 50.0),
                 new ProductCreateDTO(cheeseProductResponse.id(), 30.0),
                 new ProductCreateDTO(butterProductResponse.id(), 10.0))));
-        List<MealResponse> meals = mealsFacade.getMeals();
+        List<MealResponse> meals = mealsFacade.getMeals().getContent();
 
         //then
         assertEquals("Kanapka z szynka", sandwichWithHam.name());
@@ -86,7 +86,7 @@ class MealsTest {
 
         //then
         assertThrows(TooManyProductsInOneMealException.class, runnable::run);
-        List<MealResponse> meals = mealsFacade.getMeals();
+        List<MealResponse> meals = mealsFacade.getMeals().getContent();
         assertTrue(meals.isEmpty());
     }
 
@@ -101,7 +101,7 @@ class MealsTest {
 
         //then
         assertThrows(NegativeProductsWeightException.class, runnable::run);
-        List<MealResponse> meals = mealsFacade.getMeals();
+        List<MealResponse> meals = mealsFacade.getMeals().getContent();
         assertTrue(meals.isEmpty());
     }
 
@@ -115,7 +115,7 @@ class MealsTest {
 
         //then
         assertThrows(ResourceNotFoundException.class, runnable::run);
-        List<MealResponse> meals = mealsFacade.getMeals();
+        List<MealResponse> meals = mealsFacade.getMeals().getContent();
         assertTrue(meals.isEmpty());
     }
 
@@ -126,7 +126,7 @@ class MealsTest {
 
         //then
         assertThrows(NegativeNutritionValuesException.class, runnable::run);
-        List<StdProductResponse> stdProducts = mealsFacade.getStdProducts();
+        List<StdProductResponse> stdProducts = mealsFacade.getStdProducts().getContent();
         assertTrue(stdProducts.isEmpty());
     }
 }

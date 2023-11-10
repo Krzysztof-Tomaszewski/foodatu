@@ -1,5 +1,9 @@
 package pl.company.foodatu.meals.domain;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +13,7 @@ import java.util.UUID;
 class InMemoryStdProductsRepository implements StdProductsRepository {
 
     Map<UUID, StdProduct> memory = new HashMap<>();
+
     @Override
     public StdProduct save(StdProduct stdProduct) {
         UUID uuid = UUID.randomUUID();
@@ -18,8 +23,9 @@ class InMemoryStdProductsRepository implements StdProductsRepository {
     }
 
     @Override
-    public List<StdProduct> findAll() {
-        return memory.values().stream().toList();
+    public Page<StdProduct> findAll(Pageable pageable) {
+        List<StdProduct> stdProducts = memory.values().stream().toList();
+        return new PageImpl<>(stdProducts, pageable, stdProducts.size());
     }
 
     @Override

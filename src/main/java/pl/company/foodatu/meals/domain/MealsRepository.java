@@ -1,10 +1,11 @@
 package pl.company.foodatu.meals.domain;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 interface MealsRepository {
 
     Meal save(Meal meal);
 
-    List<Meal> findAll();
+    Page<Meal> findAll(Pageable pageable);
 }

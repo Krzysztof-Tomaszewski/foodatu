@@ -1,5 +1,7 @@
 package pl.company.foodatu.meals.domain;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import pl.company.foodatu.common.exception.ResourceNotFoundException;
 import pl.company.foodatu.meals.dto.MealCreateDTO;
 import pl.company.foodatu.meals.dto.MealResponse;
@@ -23,10 +25,13 @@ public class MealsFacade {
         return new StdProductResponse(savedStdProduct.getId(), savedStdProduct.getName());
     }
 
-    public List<StdProductResponse> getStdProducts() {
-        return stdProductsRepository.findAll().stream()
-                .map(stdProduct -> new StdProductResponse(stdProduct.getId(), stdProduct.getName()))
-                .toList();
+    public Page<StdProductResponse> getStdProducts() {
+        return getStdProducts(Pageable.unpaged());
+    }
+
+    public Page<StdProductResponse> getStdProducts(Pageable pageable) {
+        return stdProductsRepository.findAll(pageable)
+                .map(stdProduct -> new StdProductResponse(stdProduct.getId(), stdProduct.getName()));
     }
 
     public MealResponse addMeal(MealCreateDTO meal) {
@@ -41,9 +46,12 @@ public class MealsFacade {
         return new MealResponse(savedMeal.getId(), savedMeal.getName());
     }
 
-    public List<MealResponse> getMeals() {
-        return mealsRepository.findAll().stream()
-                .map(meal -> new MealResponse(meal.getId(), meal.getName()))
-                .toList();
+    public Page<MealResponse> getMeals() {
+        return getMeals(Pageable.unpaged());
+    }
+
+    public Page<MealResponse> getMeals(Pageable pageable) {
+        return mealsRepository.findAll(pageable)
+                .map(meal -> new MealResponse(meal.getId(), meal.getName()));
     }
 }

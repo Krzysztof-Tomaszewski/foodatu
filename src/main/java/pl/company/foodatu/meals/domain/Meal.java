@@ -6,7 +6,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import pl.company.foodatu.meals.dto.MealCreateDTO;
 
 import java.util.List;
 import java.util.UUID;

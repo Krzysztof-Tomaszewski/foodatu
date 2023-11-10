@@ -1,11 +1,15 @@
 package pl.company.foodatu.meals.domain;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-class InMemoryMealsRepository implements MealsRepository{
+class InMemoryMealsRepository implements MealsRepository {
 
     Map<UUID, Meal> memory = new HashMap<>();
 
@@ -18,7 +22,8 @@ class InMemoryMealsRepository implements MealsRepository{
     }
 
     @Override
-    public List<Meal> findAll() {
-        return memory.values().stream().toList();
+    public Page<Meal> findAll(Pageable pageable) {
+        List<Meal> meals = memory.values().stream().toList();
+        return new PageImpl<>(meals, pageable, meals.size());
     }
 }

@@ -12,12 +12,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.HttpClientErrorException;
 import org.testcontainers.containers.PostgreSQLContainer;
+import pl.company.foodatu.common.exception.ErrorWrapper;
 import pl.company.foodatu.common.utils.RestResponsePage;
 import pl.company.foodatu.meals.MealsClient;
 import pl.company.foodatu.meals.dto.MealCreateDTO;
 import pl.company.foodatu.meals.dto.MealResponse;
+import pl.company.foodatu.meals.dto.NullOrNegativeNutritionValuesException;
+import pl.company.foodatu.meals.dto.Nutrition;
 import pl.company.foodatu.meals.dto.ProductCreateDTO;
+import pl.company.foodatu.meals.dto.StdProductCreateDTO;
 import pl.company.foodatu.meals.dto.StdProductResponse;
 import pl.company.foodatu.plans.PlansClient;
 import pl.company.foodatu.plans.dto.PlanResponse;
@@ -29,6 +34,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static pl.company.foodatu.meals.utils.MealsTestUtils.BREAD;
 import static pl.company.foodatu.plans.utils.PlansTestUtils.SANDWICH_WITH_CHEESE;
@@ -144,6 +150,176 @@ class FoodatuApplicationTests {
         assertTrue(stdProductListResponseEntity.getBody().isLast());
         assertFalse(stdProductListResponseEntity.getBody().isFirst());
         assertEquals(4, stdProductListResponseEntity.getBody().getContent().size());
+    }
+
+    @Test
+    void addedStdProductWithNegativeNutritionValue_thenShouldThrowExceptionAndHaveStatusCode422() {
+        //given
+        String stdProduct = """
+                {
+                    "name": "chleb",
+                    "nutritionPer100g": {
+                        "carbons": -11,
+                        "proteins": 11,
+                        "fat": 5
+                    }
+                }
+                """;
+        //when
+        Runnable runnable = () -> mealsClient.addStdProduct(stdProduct);
+
+        //then
+        HttpClientErrorException ex = assertThrows(HttpClientErrorException.class, runnable::run);
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ex.getStatusCode());
+    }
+
+    @Test
+    void addedStdProductWithoutName_thenShouldThrowExceptionAndHaveStatusCode400() {
+        //given
+        String stdProduct = """
+                {
+                    "nutritionPer100g": {
+                        "carbons": 11,
+                        "proteins": 11,
+                        "fat": 5
+                    }
+                }
+                """;
+        //when
+        Runnable runnable = () -> mealsClient.addStdProduct(stdProduct);
+
+        //then
+        HttpClientErrorException ex = assertThrows(HttpClientErrorException.class, runnable::run);
+        assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    }
+
+    @Test
+    void addedMealWithoutName_thenShouldThrowExceptionAndHaveStatusCode400() {
+        //given
+        String meal = """
+                {
+                        "products": [{
+                            "id": "a7fb1154-3fd7-4bb1-a466-7de558f50c13",
+                            "weight": 20
+                        }]
+                }
+                """;
+        //when
+        Runnable runnable = () -> mealsClient.addMeal(meal);
+
+        //then
+        HttpClientErrorException ex = assertThrows(HttpClientErrorException.class, runnable::run);
+        assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    }
+
+    @Test
+    void addedStdProductWithoutNutrition_thenShouldThrowExceptionAndHaveStatusCode400() {
+        //given
+        String stdProduct = """
+                {
+                    "name": "chleb"
+                }
+                """;
+        //when
+        Runnable runnable = () -> mealsClient.addStdProduct(stdProduct);
+
+        //then
+        HttpClientErrorException ex = assertThrows(HttpClientErrorException.class, runnable::run);
+        assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    }
+
+    @Test
+    void addedMealWithoutProducts_thenShouldThrowExceptionAndHaveStatusCode400() {
+        //given
+        String meal = """
+                {
+                        "name": "kanapka"
+                }
+                """;
+        //when
+        Runnable runnable = () -> mealsClient.addMeal(meal);
+
+        //then
+        HttpClientErrorException ex = assertThrows(HttpClientErrorException.class, runnable::run);
+        assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    }
+
+    @Test
+    void addedMealWithEmptyProductsList_thenShouldThrowExceptionAndHaveStatusCode400() {
+        //given
+        String meal = """
+                {
+                        "name": "kanapka",
+                        "products": []
+                }
+                """;
+        //when
+        Runnable runnable = () -> mealsClient.addMeal(meal);
+
+        //then
+        HttpClientErrorException ex = assertThrows(HttpClientErrorException.class, runnable::run);
+        assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    }
+
+    @Test
+    void addedMealWithNotExistingProduct_thenShouldThrowExceptionAndHaveStatusCode404() {
+        //given
+        String meal = """
+                {
+                        "name": "kanapka",
+                        "products": [{
+                            "id": "a7fb1154-3fd7-4bb1-a466-7de558f50c13",
+                            "weight": 20
+                        }]
+                }
+                """;
+        //when
+        Runnable runnable = () -> mealsClient.addMeal(meal);
+
+        //then
+        HttpClientErrorException ex = assertThrows(HttpClientErrorException.class, runnable::run);
+        assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+    }
+
+    @Test
+    void addedMealWithoutProductId_thenShouldThrowExceptionAndHaveStatusCode400() {
+        //given
+        String meal = """
+                {
+                        "name": "kanapka",
+                        "products": [{
+                            "weight": 20
+                        }]
+                }
+                """;
+        //when
+        Runnable runnable = () -> mealsClient.addMeal(meal);
+
+        //then
+        HttpClientErrorException ex = assertThrows(HttpClientErrorException.class, runnable::run);
+        assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    }
+
+    @Test
+    void addedMealWithNegativeProductWeight_thenShouldThrowExceptionAndHaveStatusCode422() {
+        //given
+        String productId = mealsClient.addStdProduct(BREAD).getBody().id().toString();
+        String meal = String.format("""
+                {
+                        "name": "kanapka",
+                        "products": [{
+                            "id": "%s",
+                            "weight": -20
+                        }]
+                }
+                """, productId);
+
+        //when
+        Runnable runnable = () -> mealsClient.addMeal(meal);
+
+        //then
+        HttpClientErrorException ex = assertThrows(HttpClientErrorException.class, runnable::run);
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ex.getStatusCode());
     }
 
     @Test

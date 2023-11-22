@@ -22,7 +22,7 @@ public class MealsFacade {
     }
 
     public StdProductResponse addStdProduct(@Valid StdProductCreateDTO stdProduct) {
-        StdProduct savedStdProduct = stdProductsRepository.save(new StdProduct(stdProduct));
+        StdProduct savedStdProduct = stdProductsRepository.save(new StdProduct(stdProduct.name(), stdProduct.nutritionPer100g().proteins(), stdProduct.nutritionPer100g().carbons(), stdProduct.nutritionPer100g().fat()));
         return new StdProductResponse(savedStdProduct.getId(), savedStdProduct.getName());
     }
 

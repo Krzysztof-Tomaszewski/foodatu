@@ -4,7 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import pl.company.foodatu.meals.dto.StdProductCreateDTO;
+import pl.company.foodatu.meals.dto.NullOrNegativeNutritionValuesException;
 
 import java.util.UUID;
 
@@ -21,11 +21,17 @@ class StdProduct {
     private StdProduct() {
     }
 
-    StdProduct(StdProductCreateDTO stdProductCreateDTO) {
-        this.name = stdProductCreateDTO.name();
-        this.proteins = stdProductCreateDTO.nutritionPer100g().proteins();
-        this.carbons = stdProductCreateDTO.nutritionPer100g().carbons();
-        this.fat = stdProductCreateDTO.nutritionPer100g().fat();
+    StdProduct(String name, Double proteins, Double carbons, Double fat) {
+
+        if (carbons == null || proteins == null  || fat == null  ||
+                carbons < 0 || proteins < 0 || fat < 0) {
+            throw new NullOrNegativeNutritionValuesException();
+        }
+
+        this.name = name;
+        this.proteins = proteins;
+        this.carbons = carbons;
+        this.fat = fat;
     }
 
     void setId(UUID id) {

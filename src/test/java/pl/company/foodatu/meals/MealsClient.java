@@ -3,7 +3,9 @@ package pl.company.foodatu.meals;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -50,6 +52,14 @@ public class MealsClient {
                 BASE_PATH + "/std-products", HttpMethod.POST, entity, StdProductResponse.class);
     }
 
+    public ResponseEntity<Object> addStdProduct(String stdProductCreateDTO) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>(stdProductCreateDTO, headers);
+        return restTemplate.exchange(
+                BASE_PATH + "/std-products", HttpMethod.POST, entity, Object.class);
+    }
+
     public ResponseEntity<RestResponsePage<MealResponse>> getMeals() {
         return getMeals(new HashMap<>());
     }
@@ -69,5 +79,13 @@ public class MealsClient {
         HttpEntity<MealCreateDTO> entity = new HttpEntity<>(mealCreateDTO);
         return restTemplate.exchange(
                 BASE_PATH + "/meals", HttpMethod.POST, entity, MealResponse.class);
+    }
+
+    public ResponseEntity<Object> addMeal(String mealCreateDTO) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>(mealCreateDTO, headers);
+        return restTemplate.exchange(
+                BASE_PATH + "/meals", HttpMethod.POST, entity, Object.class);
     }
 }

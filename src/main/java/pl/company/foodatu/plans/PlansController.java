@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pl.company.foodatu.plans.domain.PlansFacade;
-import pl.company.foodatu.plans.dto.UserId;
 import pl.company.foodatu.plans.dto.Meal;
 import pl.company.foodatu.plans.dto.PlanResponse;
+import pl.company.foodatu.plans.dto.UserId;
 
 import java.time.LocalDate;
 

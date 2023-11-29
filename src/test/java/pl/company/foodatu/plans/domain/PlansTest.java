@@ -8,6 +8,7 @@ import pl.company.foodatu.plans.dto.PlannedMealResponse;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static pl.company.foodatu.plans.utils.PlansTestUtils.SANDWICH_WITH_CHEESE;
 import static pl.company.foodatu.plans.utils.PlansTestUtils.SANDWICH_WITH_HAM;
 import static pl.company.foodatu.plans.utils.PlansTestUtils.TODAY;
@@ -15,7 +16,7 @@ import static pl.company.foodatu.plans.utils.PlansTestUtils.USER;
 
 class PlansTest {
 
-    private PlansFacade plansFacade = new PlansConfiguration().inMemoryFacade();
+    private PlansFacade plansFacade = new PlansConfiguration().plansInMemoryFacade();
 
     @Test
     void shouldAddMealToDayPlan() {
@@ -52,7 +53,7 @@ class PlansTest {
 
 
         //then
-        Assertions.assertThrows(TooManyMealsInDayPlanException.class, runnable::run);
+        assertThrows(TooManyMealsInDayPlanException.class, runnable::run);
         PlanResponse plan = plansFacade.getPlanForDay(USER, TODAY);
         assertEquals(6, plan.plannedMeals().size());
     }

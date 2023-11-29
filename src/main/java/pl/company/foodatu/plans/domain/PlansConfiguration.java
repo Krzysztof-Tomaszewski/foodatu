@@ -9,13 +9,13 @@ class PlansConfiguration {
 
     @Bean
     @Profile("local")
-    PlansFacade inMemoryFacade() {
+    PlansFacade plansInMemoryFacade() {
         return new PlansFacade(new InMemoryDaysPlansRepository());
     }
 
     @Bean
     @Profile("!local")
-    PlansFacade realFacade(DaysPlansRepository repository) {
+    PlansFacade plansRealFacade(DaysPlansRepository repository) {
         return new PlansFacade(repository);
     }
 }

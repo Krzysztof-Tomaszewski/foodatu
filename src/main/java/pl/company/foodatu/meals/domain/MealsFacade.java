@@ -44,7 +44,7 @@ public class MealsFacade {
                 })
                 .toList();
         Meal savedMeal = mealsRepository.save(new Meal(meal.name(), products));
-        return new MealResponse(savedMeal.getId(), savedMeal.getName());
+        return new MealResponse(savedMeal.getId(), savedMeal.getName(), savedMeal.calculateNutritionValues());
     }
 
     public Page<MealResponse> getMeals() {
@@ -53,6 +53,6 @@ public class MealsFacade {
 
     public Page<MealResponse> getMeals(Pageable pageable) {
         return mealsRepository.findAll(pageable)
-                .map(meal -> new MealResponse(meal.getId(), meal.getName()));
+                .map(meal -> new MealResponse(meal.getId(), meal.getName(), meal.calculateNutritionValues()));
     }
 }

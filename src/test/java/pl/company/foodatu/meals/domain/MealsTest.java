@@ -48,6 +48,7 @@ class MealsTest {
     @Test
     void shouldAdd2MealsWith2ProductsEachAndReturnListContainingTheseMeals() {
         //given
+        double epsilon = 0.000001d;
         StdProductResponse breadProductResponse = mealsFacade.addStdProduct(BREAD);
         StdProductResponse butterProductResponse = mealsFacade.addStdProduct(BUTTER);
         StdProductResponse hamProductResponse = mealsFacade.addStdProduct(HAM);
@@ -66,7 +67,15 @@ class MealsTest {
 
         //then
         assertEquals("Kanapka z szynka", sandwichWithHam.name());
+        assertEquals(25.14, sandwichWithHam.nutritionValues().carbons(), epsilon);
+        assertEquals(9.925, sandwichWithHam.nutritionValues().proteins(), epsilon);
+        assertEquals(11.825, sandwichWithHam.nutritionValues().fat(), epsilon);
+
         assertEquals("Kanapka z serem", sandwichWithCheese.name());
+        assertEquals(25.476, sandwichWithCheese.nutritionValues().carbons(), epsilon);
+        assertEquals(12.007, sandwichWithCheese.nutritionValues().proteins(), epsilon);
+        assertEquals(18.197, sandwichWithCheese.nutritionValues().fat(), epsilon);
+
         assertTrue(meals.contains(sandwichWithHam));
         assertTrue(meals.contains(sandwichWithCheese));
         assertEquals(2, meals.size());

@@ -1,5 +1,6 @@
 package pl.company.foodatu.plans.domain;
 
+import pl.company.foodatu.meals.domain.MealsFacade;
 import pl.company.foodatu.plans.dto.Meal;
 import pl.company.foodatu.plans.dto.PlanResponse;
 import pl.company.foodatu.plans.dto.PlannedMealResponse;
@@ -12,9 +13,11 @@ import java.util.List;
 public class PlansFacade {
 
     private final DaysPlansRepository repository;
+    private final MealsFacade mealsFacade;
 
-    public PlansFacade(DaysPlansRepository repository) {
+    public PlansFacade(DaysPlansRepository repository, MealsFacade mealsFacade) {
         this.repository = repository;
+        this.mealsFacade = mealsFacade;
     }
 
     public PlanResponse addMealToPlan(Meal meal, UserId user, LocalDate day) {

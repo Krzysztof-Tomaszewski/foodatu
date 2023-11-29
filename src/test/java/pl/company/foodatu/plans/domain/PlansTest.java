@@ -2,6 +2,10 @@ package pl.company.foodatu.plans.domain;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import pl.company.foodatu.meals.domain.MealsFacade;
 import pl.company.foodatu.plans.dto.PlanResponse;
 import pl.company.foodatu.plans.dto.PlannedMealResponse;
 
@@ -14,9 +18,13 @@ import static pl.company.foodatu.plans.utils.PlansTestUtils.SANDWICH_WITH_HAM;
 import static pl.company.foodatu.plans.utils.PlansTestUtils.TODAY;
 import static pl.company.foodatu.plans.utils.PlansTestUtils.USER;
 
+@RunWith(MockitoJUnitRunner.class)
 class PlansTest {
 
-    private PlansFacade plansFacade = new PlansConfiguration().plansInMemoryFacade();
+    @Mock
+    private MealsFacade mealsFacade;
+
+    private PlansFacade plansFacade = new PlansConfiguration().plansInMemoryFacade(mealsFacade);
 
     @Test
     void shouldAddMealToDayPlan() {

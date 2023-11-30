@@ -4,6 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import pl.company.foodatu.meals.dto.NullOrNegativeProductsWeightException;
 import pl.company.foodatu.meals.dto.Nutrition;
@@ -17,9 +19,11 @@ class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    @OneToOne
+    @ManyToOne
+    @JoinColumn(name = "std_product_id", referencedColumnName = "id")
     private StdProduct stdProduct;
     private Double weight;
+
 
     private Product() {
     }

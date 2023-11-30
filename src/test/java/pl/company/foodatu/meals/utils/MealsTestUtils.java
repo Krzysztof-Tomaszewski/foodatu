@@ -9,6 +9,4 @@ public class MealsTestUtils {
     public static final StdProductCreateDTO BUTTER = new StdProductCreateDTO("Maslo", new Nutrition(1.0, 1.0, 83.0));
     public static final StdProductCreateDTO HAM = new StdProductCreateDTO("Szynka", new Nutrition(1.1, 18.0, 6.2));
     public static final StdProductCreateDTO CHEESE = new StdProductCreateDTO("Ser", new Nutrition(2.22, 24.94, 27.44));
-
-
 }

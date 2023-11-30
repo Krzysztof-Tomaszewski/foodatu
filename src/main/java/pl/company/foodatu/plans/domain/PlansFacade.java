@@ -1,7 +1,9 @@
 package pl.company.foodatu.plans.domain;
 
+import pl.company.foodatu.common.exception.ResourceNotFoundException;
 import pl.company.foodatu.meals.domain.MealsFacade;
-import pl.company.foodatu.plans.dto.Meal;
+import pl.company.foodatu.meals.dto.MealResponse;
+import pl.company.foodatu.plans.dto.MealId;
 import pl.company.foodatu.plans.dto.PlanResponse;
 import pl.company.foodatu.plans.dto.PlannedMealResponse;
 import pl.company.foodatu.plans.dto.UserId;
@@ -20,13 +22,15 @@ public class PlansFacade {
         this.mealsFacade = mealsFacade;
     }
 
-    public PlanResponse addMealToPlan(Meal meal, UserId user, LocalDate day) {
+    public PlanResponse addMealToPlan(MealId mealId, UserId user, LocalDate day) {
+
+        MealResponse meal = mealsFacade.getMeal(mealId.id()).orElseThrow(() -> new ResourceNotFoundException("Could not find meal with id: " + mealId.id()));
 
         var dayPlan = repository
                 .find(user, day)
                 .orElse(new DayPlan(new User(user.id()), day, new ArrayList<>()));
 
-        dayPlan.addMeal(new PlannedMeal(meal.name(), meal.carbons(), meal.proteins(), meal.fat()));
+        dayPlan.addMeal(new PlannedMeal(meal.name(), meal.nutritionValues().carbons(), meal.nutritionValues().proteins(), meal.nutritionValues().fat()));
         DayPlan savedPlan = repository.save(dayPlan);
         return new PlanResponse(getPlannedMeals(savedPlan), savedPlan.calculateKCal());
     }

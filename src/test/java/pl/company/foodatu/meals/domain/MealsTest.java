@@ -10,9 +10,11 @@ import pl.company.foodatu.meals.dto.Nutrition;
 import pl.company.foodatu.meals.dto.ProductCreateDTO;
 import pl.company.foodatu.meals.dto.StdProductCreateDTO;
 import pl.company.foodatu.meals.dto.StdProductResponse;
+import pl.company.foodatu.plans.utils.PlansTestUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,6 +25,7 @@ import static pl.company.foodatu.meals.utils.MealsTestUtils.BREAD;
 import static pl.company.foodatu.meals.utils.MealsTestUtils.BUTTER;
 import static pl.company.foodatu.meals.utils.MealsTestUtils.CHEESE;
 import static pl.company.foodatu.meals.utils.MealsTestUtils.HAM;
+import static pl.company.foodatu.plans.utils.PlansTestUtils.SANDWICH_WITH_HAM;
 
 class MealsTest {
 
@@ -46,7 +49,7 @@ class MealsTest {
     }
 
     @Test
-    void shouldAdd2MealsWith2ProductsEachAndReturnListContainingTheseMeals() {
+    void shouldAdd2MealsWith3ProductsEachAndReturnListContainingTheseMeals() {
         //given
         double epsilon = 0.000001d;
         StdProductResponse breadProductResponse = mealsFacade.addStdProduct(BREAD);
@@ -79,6 +82,34 @@ class MealsTest {
         assertTrue(meals.contains(sandwichWithHam));
         assertTrue(meals.contains(sandwichWithCheese));
         assertEquals(2, meals.size());
+    }
+
+    @Test
+    void shouldAddMealWith3ProductsAndReturnItById() {
+        //given
+        double epsilon = 0.000001d;
+        StdProductResponse breadProductResponse = mealsFacade.addStdProduct(BREAD);
+        StdProductResponse butterProductResponse = mealsFacade.addStdProduct(BUTTER);
+        StdProductResponse hamProductResponse = mealsFacade.addStdProduct(HAM);
+
+        //when
+        MealResponse sandwichWithHam = mealsFacade.addMeal(new MealCreateDTO("Kanapka z szynka", List.of(
+                new ProductCreateDTO(breadProductResponse.id(), 50.0),
+                new ProductCreateDTO(hamProductResponse.id(), 30.0),
+                new ProductCreateDTO(butterProductResponse.id(), 10.0))));
+        MealResponse mealResponse = mealsFacade.getMeal(sandwichWithHam.id()).orElseThrow(ResourceNotFoundException::new);
+
+        assertEquals("Kanapka z szynka", mealResponse.name());
+        assertEquals(25.14, mealResponse.nutritionValues().carbons(), epsilon);
+        assertEquals(9.925, mealResponse.nutritionValues().proteins(), epsilon);
+        assertEquals(11.825, mealResponse.nutritionValues().fat(), epsilon);
+        assertEquals(sandwichWithHam, mealResponse);
+    }
+
+    @Test
+    void getNotExistingInDbMeal_shouldReturnEmptyOptional() {
+        Optional<MealResponse> mealResponse = mealsFacade.getMeal(SANDWICH_WITH_HAM.id());
+        assertTrue(mealResponse.isEmpty());
     }
 
     @Test

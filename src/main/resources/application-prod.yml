@@ -1,0 +1,5 @@
+spring:
+  data:
+    mongodb:
+      database: test
+      uri: mongodb+srv://${MONGODB_URI}/?retryWrites=true&w=majority

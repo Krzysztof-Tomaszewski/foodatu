@@ -6,21 +6,25 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import pl.company.foodatu.common.exception.ResourceNotFoundException;
 import pl.company.foodatu.meals.domain.MealsFacade;
 import pl.company.foodatu.meals.dto.MealCreateDTO;
 import pl.company.foodatu.meals.dto.MealResponse;
 import pl.company.foodatu.meals.dto.StdProductCreateDTO;
 import pl.company.foodatu.meals.dto.StdProductResponse;
 
+import java.util.UUID;
+
 @RequestMapping("/api/v1/")
 @RestController
 class MealsController {
 
-    private MealsFacade mealsFacade;
+    private final MealsFacade mealsFacade;
 
     MealsController(MealsFacade mealsFacade) {
         this.mealsFacade = mealsFacade;
@@ -39,6 +43,12 @@ class MealsController {
     @GetMapping("meals")
     ResponseEntity<Page<MealResponse>> getMeals(Pageable pageable) {
         return ResponseEntity.ok(mealsFacade.getMeals(pageable));
+    }
+
+    @GetMapping("meals/{id}")
+    ResponseEntity<MealResponse> getMeals(@PathVariable UUID id) {
+        MealResponse mealResponse = mealsFacade.getMeal(id).orElseThrow(() -> new ResourceNotFoundException("Could not find meal with id: " + id));
+        return ResponseEntity.ok(mealResponse);
     }
 
     @PostMapping("meals")

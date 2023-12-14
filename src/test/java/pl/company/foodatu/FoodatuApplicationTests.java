@@ -14,17 +14,14 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.HttpClientErrorException;
 import org.testcontainers.containers.PostgreSQLContainer;
-import pl.company.foodatu.common.exception.ErrorWrapper;
 import pl.company.foodatu.common.utils.RestResponsePage;
 import pl.company.foodatu.meals.MealsClient;
 import pl.company.foodatu.meals.dto.MealCreateDTO;
 import pl.company.foodatu.meals.dto.MealResponse;
-import pl.company.foodatu.meals.dto.NullOrNegativeNutritionValuesException;
-import pl.company.foodatu.meals.dto.Nutrition;
 import pl.company.foodatu.meals.dto.ProductCreateDTO;
-import pl.company.foodatu.meals.dto.StdProductCreateDTO;
 import pl.company.foodatu.meals.dto.StdProductResponse;
 import pl.company.foodatu.plans.PlansClient;
+import pl.company.foodatu.plans.dto.MealId;
 import pl.company.foodatu.plans.dto.PlanResponse;
 
 import java.io.IOException;
@@ -37,6 +34,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static pl.company.foodatu.meals.utils.MealsTestUtils.BREAD;
+import static pl.company.foodatu.meals.utils.MealsTestUtils.BUTTER;
+import static pl.company.foodatu.meals.utils.MealsTestUtils.CHEESE;
+import static pl.company.foodatu.meals.utils.MealsTestUtils.HAM;
 import static pl.company.foodatu.plans.utils.PlansTestUtils.SANDWICH_WITH_CHEESE;
 import static pl.company.foodatu.plans.utils.PlansTestUtils.SANDWICH_WITH_HAM;
 import static pl.company.foodatu.plans.utils.PlansTestUtils.TODAY;
@@ -325,26 +325,44 @@ class FoodatuApplicationTests {
     @Test
     void addedMeal_then_planContains1MealAndItIsReturnedWithPlan() {
         //given
-        plansClient.addMealToPlan(SANDWICH_WITH_CHEESE, USER.id(), TODAY);
+        UUID breadId = mealsClient.addStdProduct(BREAD).getBody().id();
+        MealResponse mealResponse = mealsClient.addMeal(new MealCreateDTO("kanapka",
+                List.of(new ProductCreateDTO(breadId, 30.0)))).getBody();
+        plansClient.addMealToPlan(new MealId(mealResponse.id()), USER.id(), TODAY);
 
         //when
         PlanResponse plan = plansClient.getPlanForDay(USER.id(), TODAY);
 
         //then
         assertEquals(1, plan.plannedMeals().size());
-        assertEquals(SANDWICH_WITH_CHEESE.name(), plan.plannedMeals().get(0).name());
+        assertEquals(mealResponse.name(), plan.plannedMeals().get(0).name());
     }
 
     @Test
     void added2MealsToPlan_then_shouldTellHowManyKCalInPlan() {
         //given
-        plansClient.addMealToPlan(SANDWICH_WITH_CHEESE, USER.id(), TODAY);
-        plansClient.addMealToPlan(SANDWICH_WITH_HAM, USER.id(), TODAY);
+        double epsilon = 0.000001d;
+        UUID breadId = mealsClient.addStdProduct(BREAD).getBody().id();
+        UUID butterId = mealsClient.addStdProduct(BUTTER).getBody().id();
+        UUID cheeseId = mealsClient.addStdProduct(CHEESE).getBody().id();
+        UUID hamId = mealsClient.addStdProduct(HAM).getBody().id();
+        MealResponse sandwichWithHam = mealsClient.addMeal(new MealCreateDTO("Kanapka z szynka",
+                List.of(new ProductCreateDTO(breadId, 50.0),
+                        new ProductCreateDTO(butterId, 10.0),
+                        new ProductCreateDTO(hamId, 30.0)))).getBody();
+
+        MealResponse sandwichWithCheese = mealsClient.addMeal(new MealCreateDTO("Kanapka z serem",
+                List.of(new ProductCreateDTO(breadId, 50.0),
+                        new ProductCreateDTO(butterId, 10.0),
+                        new ProductCreateDTO(cheeseId, 30.0)))).getBody();
+
+        plansClient.addMealToPlan(new MealId(sandwichWithCheese.id()), USER.id(), TODAY);
+        plansClient.addMealToPlan(new MealId(sandwichWithHam.id()), USER.id(), TODAY);
 
         //when
         PlanResponse plan = plansClient.getPlanForDay(USER.id(), TODAY);
 
         //then
-        assertEquals(214.5 + 292.5, plan.getKCal());
+        assertEquals(313.705 + 246.685, plan.getKCal(), epsilon);
     }
 }

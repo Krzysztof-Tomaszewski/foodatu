@@ -45,4 +45,16 @@ class StdProduct {
     String getName() {
         return this.name;
     }
+
+    Double getProteins() {
+        return proteins;
+    }
+
+    Double getCarbons() {
+        return carbons;
+    }
+
+    Double getFat() {
+        return fat;
+    }
 }

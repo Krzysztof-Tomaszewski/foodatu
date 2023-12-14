@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 class InMemoryMealsRepository implements MealsRepository {
@@ -26,4 +27,11 @@ class InMemoryMealsRepository implements MealsRepository {
         List<Meal> meals = memory.values().stream().toList();
         return new PageImpl<>(meals, pageable, meals.size());
     }
+
+    @Override
+    public Optional<Meal> findById(UUID id) {
+        return Optional.ofNullable(memory.get(id));
+    }
+
+
 }

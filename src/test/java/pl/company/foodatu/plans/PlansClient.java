@@ -4,6 +4,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import pl.company.foodatu.plans.dto.Meal;
+import pl.company.foodatu.plans.dto.MealId;
 import pl.company.foodatu.plans.dto.PlanResponse;
 
 import java.time.LocalDate;
@@ -25,10 +26,10 @@ public class PlansClient {
                 PlanResponse.class);
     }
 
-    public PlanResponse addMealToPlan(Meal meal, String userId, LocalDate day) {
+    public PlanResponse addMealToPlan(MealId mealId, String userId, LocalDate day) {
         return restTemplate.postForObject(
                 BASE_PATH + "/" + userId + "/plans/" + day + "/meals",
-                meal,
+                mealId,
                 PlanResponse.class);
     }
 }

@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import pl.company.foodatu.meals.dto.Nutrition;
 
 import java.util.List;
 import java.util.Objects;
@@ -30,7 +31,7 @@ class Meal {
         Objects.requireNonNull(name);
         Objects.requireNonNull(products);
 
-        if(products.isEmpty()) {
+        if (products.isEmpty()) {
             throw new MealWithZeroProductsException();
         }
 
@@ -52,5 +53,12 @@ class Meal {
 
     String getName() {
         return this.name;
+    }
+
+    Nutrition calculateNutritionValues() {
+        return products.stream()
+                .map(Product::calculateNutritionValues)
+                .reduce(new Nutrition(0.0, 0.0, 0.0),
+                        Nutrition::add);
     }
 }

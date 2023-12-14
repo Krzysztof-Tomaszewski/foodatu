@@ -19,6 +19,7 @@ import pl.company.foodatu.meals.dto.StdProductResponse;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Component
 public class MealsClient {
@@ -73,6 +74,15 @@ public class MealsClient {
         return restTemplate.exchange(
                 urlTemplate, HttpMethod.GET, null, new ParameterizedTypeReference<RestResponsePage<MealResponse>>() {
                 }, params);
+    }
+
+    public ResponseEntity<MealResponse> getMeal(UUID id) {
+        String urlTemplate = UriComponentsBuilder.fromHttpUrl(BASE_PATH + "/meals/" + id)
+                .encode()
+                .toUriString();
+        return restTemplate.exchange(
+                urlTemplate, HttpMethod.GET, null, new ParameterizedTypeReference<MealResponse>() {
+                }, new HashMap<>());
     }
 
     public ResponseEntity<MealResponse> addMeal(MealCreateDTO mealCreateDTO) {

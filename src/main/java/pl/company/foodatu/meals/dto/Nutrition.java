@@ -11,4 +11,11 @@ public record Nutrition(
             throw new NullOrNegativeNutritionValuesException();
         }
     }
+
+    public Nutrition add(Nutrition nutrition) {
+        Double carbons = carbons() + nutrition.carbons();
+        Double proteins = proteins() + nutrition.proteins();
+        Double fat = fat() + nutrition.fat();
+        return new Nutrition(carbons, proteins, fat);
+    }
 }

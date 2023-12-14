@@ -10,6 +10,8 @@ import pl.company.foodatu.meals.dto.StdProductCreateDTO;
 import pl.company.foodatu.meals.dto.StdProductResponse;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public class MealsFacade {
 
@@ -44,7 +46,7 @@ public class MealsFacade {
                 })
                 .toList();
         Meal savedMeal = mealsRepository.save(new Meal(meal.name(), products));
-        return new MealResponse(savedMeal.getId(), savedMeal.getName());
+        return new MealResponse(savedMeal.getId(), savedMeal.getName(), savedMeal.calculateNutritionValues());
     }
 
     public Page<MealResponse> getMeals() {
@@ -53,6 +55,12 @@ public class MealsFacade {
 
     public Page<MealResponse> getMeals(Pageable pageable) {
         return mealsRepository.findAll(pageable)
-                .map(meal -> new MealResponse(meal.getId(), meal.getName()));
+                .map(meal -> new MealResponse(meal.getId(), meal.getName(), meal.calculateNutritionValues()));
+    }
+
+    public Optional<MealResponse> getMeal(UUID id) {
+        return mealsRepository.findById(id)
+                .map(meal -> new MealResponse(meal.getId(), meal.getName(), meal.calculateNutritionValues()));
+
     }
 }

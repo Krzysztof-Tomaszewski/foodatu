@@ -17,13 +17,13 @@ class InMemoryDaysPlansRepository implements DaysPlansRepository {
     @Override
     public DayPlan save(DayPlan plan) {
         var plans = Stream.concat(
-                        memory.getOrDefault(new UserId(plan.user().getId()), List.of())
+                        memory.getOrDefault(new UserId(plan.userId()), List.of())
                                 .stream()
                                 .filter(dayPlan -> !dayPlan.localDate().isEqual(plan.localDate())),
                         Stream.of(plan)
                 )
                 .toList();
-        memory.put(new UserId(plan.user().getId()), plans);
+        memory.put(new UserId(plan.userId()), plans);
         return plan;
     }
 

@@ -2,5 +2,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
+  data:
+    mongodb:
+      uuid-representation: standard
+      database: test
+      uri: mongodb+srv://${MONGODB_URI}/?retryWrites=true&w=majority
 server:
   port: 8080

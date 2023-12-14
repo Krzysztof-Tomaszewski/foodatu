@@ -1,27 +1,20 @@
 package pl.company.foodatu.meals.domain;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import org.springframework.data.mongodb.core.mapping.Document;
+import pl.company.foodatu.common.config.UuidIdentifiedEntity;
 import pl.company.foodatu.meals.dto.Nutrition;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-@Entity
-class Meal {
+@Document("meals")
+class Meal extends UuidIdentifiedEntity {
 
     static final int MAX_PRODUCTS = 10;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
     private String name;
-    @OneToMany(cascade = CascadeType.ALL)
+
     private List<Product> products;
 
     private Meal() {
@@ -44,6 +37,9 @@ class Meal {
     }
 
     void setId(UUID id) {
+        if (this.id != null) {
+            throw new UnsupportedOperationException("ID is already defined");
+        }
         this.id = id;
     }
 

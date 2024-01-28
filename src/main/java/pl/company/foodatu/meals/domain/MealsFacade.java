@@ -17,10 +17,12 @@ public class MealsFacade {
 
     private final MealsRepository mealsRepository;
     private final StdProductsRepository stdProductsRepository;
+    private final MealResponseKafkaProducer mealResponseKafkaProducer;
 
-    public MealsFacade(MealsRepository mealsRepository, StdProductsRepository stdProductsRepository) {
+    public MealsFacade(MealsRepository mealsRepository, StdProductsRepository stdProductsRepository, MealResponseKafkaProducer mealResponseKafkaProducer) {
         this.mealsRepository = mealsRepository;
         this.stdProductsRepository = stdProductsRepository;
+        this.mealResponseKafkaProducer = mealResponseKafkaProducer;
     }
 
     public StdProductResponse addStdProduct(@Valid StdProductCreateDTO stdProduct) {
@@ -46,7 +48,9 @@ public class MealsFacade {
                 })
                 .toList();
         Meal savedMeal = mealsRepository.save(new Meal(meal.name(), products));
-        return new MealResponse(savedMeal.getId(), savedMeal.getName(), savedMeal.calculateNutritionValues());
+        MealResponse mealResponse = new MealResponse(savedMeal.getId(), savedMeal.getName(), savedMeal.calculateNutritionValues());
+        mealResponseKafkaProducer.send(mealResponse);
+        return mealResponse;
     }
 
     public Page<MealResponse> getMeals() {

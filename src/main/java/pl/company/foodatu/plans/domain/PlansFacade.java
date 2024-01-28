@@ -1,8 +1,6 @@
 package pl.company.foodatu.plans.domain;
 
 import pl.company.foodatu.common.exception.ResourceNotFoundException;
-import pl.company.foodatu.meals.domain.MealsFacade;
-import pl.company.foodatu.meals.dto.MealResponse;
 import pl.company.foodatu.plans.dto.MealId;
 import pl.company.foodatu.plans.dto.PlanResponse;
 import pl.company.foodatu.plans.dto.PlannedMealResponse;
@@ -15,22 +13,22 @@ import java.util.List;
 public class PlansFacade {
 
     private final DaysPlansRepository repository;
-    private final MealsFacade mealsFacade;
+    private final AvailableMealsRepository availableMealsRepository;
 
-    public PlansFacade(DaysPlansRepository repository, MealsFacade mealsFacade) {
+    public PlansFacade(DaysPlansRepository repository, AvailableMealsRepository availableMealsRepository) {
         this.repository = repository;
-        this.mealsFacade = mealsFacade;
+        this.availableMealsRepository = availableMealsRepository;
     }
 
     public PlanResponse addMealToPlan(MealId mealId, UserId user, LocalDate day) {
 
-        MealResponse meal = mealsFacade.getMeal(mealId.id()).orElseThrow(() -> new ResourceNotFoundException("Could not find meal with id: " + mealId.id()));
+        AvailableMeal meal = availableMealsRepository.findById(mealId.id()).orElseThrow(() -> new ResourceNotFoundException("Could not find meal with id: " + mealId.id()));
 
         var dayPlan = repository
                 .find(user, day)
                 .orElse(new DayPlan(user.id(), day, new ArrayList<>()));
 
-        dayPlan.addMeal(new PlannedMeal(meal.name(), meal.nutritionValues().carbons(), meal.nutritionValues().proteins(), meal.nutritionValues().fat()));
+        dayPlan.addMeal(new PlannedMeal(meal.getName(), meal.getCarbons(), meal.getProteins(), meal.getFat()));
         DayPlan savedPlan = repository.save(dayPlan);
         return new PlanResponse(getPlannedMeals(savedPlan), savedPlan.calculateKCal());
     }

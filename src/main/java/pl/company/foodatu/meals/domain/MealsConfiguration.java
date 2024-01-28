@@ -8,13 +8,13 @@ import org.springframework.context.annotation.Profile;
 class MealsConfiguration {
     @Bean
     @Profile("local")
-    MealsFacade mealsInMemoryFacade() {
-        return new MealsFacade(new InMemoryMealsRepository(), new InMemoryStdProductsRepository());
+    MealsFacade mealsInMemoryFacade(MealResponseKafkaProducer mealResponseKafkaProducer) {
+        return new MealsFacade(new InMemoryMealsRepository(), new InMemoryStdProductsRepository(), mealResponseKafkaProducer);
     }
 
     @Bean
     @Profile("!local")
-    MealsFacade mealsRealFacade(MealsRepository repository, StdProductsRepository stdProductsRepository) {
-        return new MealsFacade(repository, stdProductsRepository);
+    MealsFacade mealsRealFacade(MealsRepository repository, StdProductsRepository stdProductsRepository, MealResponseKafkaProducer mealResponseKafkaProducer) {
+        return new MealsFacade(repository, stdProductsRepository, mealResponseKafkaProducer);
     }
 }

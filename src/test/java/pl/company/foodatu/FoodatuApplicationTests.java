@@ -17,7 +17,9 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.HttpClientErrorException;
+import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.utility.DockerImageName;
 import pl.company.foodatu.common.utils.RestResponsePage;
 import pl.company.foodatu.meals.MealsClient;
 import pl.company.foodatu.meals.dto.MealCreateDTO;
@@ -32,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -54,6 +57,7 @@ class FoodatuApplicationTests {
     MealsClient mealsClient;
 
 
+    static KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"));
     static MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:latest").withExposedPorts(27017);
     static MongoClient mongoClient;
 
@@ -61,11 +65,12 @@ class FoodatuApplicationTests {
     static void beforeAll() {
         mongoDBContainer.start();
         mongoClient = MongoClients.create(mongoDBContainer.getReplicaSetUrl());
+        kafkaContainer.start();
     }
 
     @BeforeEach
     void beforeEach() {
-        List<String> collections = List.of("meals", "std_products", "day_plans");
+        List<String> collections = List.of("meals", "std_products", "day_plans", "available_meals");
 
         MongoDatabase database = mongoClient.getDatabase("test");
         for (String collection : collections) {
@@ -75,6 +80,7 @@ class FoodatuApplicationTests {
 
     @AfterAll
     static void afterAll() {
+        kafkaContainer.stop();
         mongoClient.close();
         mongoDBContainer.stop();
     }
@@ -84,6 +90,8 @@ class FoodatuApplicationTests {
         registry.add("spring.data.mongodb.database", () -> "test");
         registry.add("spring.data.mongodb.port", () -> mongoDBContainer.getMappedPort(27017));
         registry.add("spring.data.mongodb.host", mongoDBContainer::getHost);
+
+        registry.add("spring.kafka.bootstrap-servers", kafkaContainer::getBootstrapServers);
     }
 
     @Test
@@ -365,6 +373,11 @@ class FoodatuApplicationTests {
                         .map(product -> new ProductCreateDTO(product.getKey(), product.getValue()))
                         .toList()
         )).getBody();
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         plansClient.addMealToPlan(new MealId(mealResponse.id()), USER.id(), TODAY);
     }
 

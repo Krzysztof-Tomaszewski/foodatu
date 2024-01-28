@@ -1,6 +1,12 @@
 package pl.company.foodatu.meals.domain;
 
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import pl.company.foodatu.common.exception.ResourceNotFoundException;
 import pl.company.foodatu.meals.dto.MealCreateDTO;
 import pl.company.foodatu.meals.dto.MealResponse;
@@ -10,7 +16,6 @@ import pl.company.foodatu.meals.dto.Nutrition;
 import pl.company.foodatu.meals.dto.ProductCreateDTO;
 import pl.company.foodatu.meals.dto.StdProductCreateDTO;
 import pl.company.foodatu.meals.dto.StdProductResponse;
-import pl.company.foodatu.plans.utils.PlansTestUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,9 +32,17 @@ import static pl.company.foodatu.meals.utils.MealsTestUtils.CHEESE;
 import static pl.company.foodatu.meals.utils.MealsTestUtils.HAM;
 import static pl.company.foodatu.plans.utils.PlansTestUtils.SANDWICH_WITH_HAM;
 
+@RunWith(MockitoJUnitRunner.class)
 class MealsTest {
 
-    private MealsFacade mealsFacade = new MealsConfiguration().mealsInMemoryFacade();
+    @Mock
+    private MealResponseKafkaProducer mealResponseKafkaProducer;
+    private MealsFacade mealsFacade = new MealsConfiguration().mealsInMemoryFacade(mealResponseKafkaProducer);
+
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        mealsFacade = new MealsConfiguration().mealsInMemoryFacade(mealResponseKafkaProducer);
+    }
 
     @Test
     void shouldAdd2StdProductsAndReturnListContainingTheseProducts() {
@@ -51,7 +64,9 @@ class MealsTest {
     @Test
     void shouldAdd2MealsWith3ProductsEachAndReturnListContainingTheseMeals() {
         //given
+        setUp();
         double epsilon = 0.000001d;
+        ArgumentCaptor<MealResponse> captor = ArgumentCaptor.forClass(MealResponse.class);
         StdProductResponse breadProductResponse = mealsFacade.addStdProduct(BREAD);
         StdProductResponse butterProductResponse = mealsFacade.addStdProduct(BUTTER);
         StdProductResponse hamProductResponse = mealsFacade.addStdProduct(HAM);
@@ -69,6 +84,8 @@ class MealsTest {
         List<MealResponse> meals = mealsFacade.getMeals().getContent();
 
         //then
+        Mockito.verify(mealResponseKafkaProducer).send(sandwichWithHam);
+        Mockito.verify(mealResponseKafkaProducer).send(sandwichWithCheese);
         assertEquals("Kanapka z szynka", sandwichWithHam.name());
         assertEquals(25.14, sandwichWithHam.nutritionValues().carbons(), epsilon);
         assertEquals(9.925, sandwichWithHam.nutritionValues().proteins(), epsilon);
@@ -87,6 +104,7 @@ class MealsTest {
     @Test
     void shouldAddMealWith3ProductsAndReturnItById() {
         //given
+        setUp();
         double epsilon = 0.000001d;
         StdProductResponse breadProductResponse = mealsFacade.addStdProduct(BREAD);
         StdProductResponse butterProductResponse = mealsFacade.addStdProduct(BUTTER);
@@ -99,6 +117,8 @@ class MealsTest {
                 new ProductCreateDTO(butterProductResponse.id(), 10.0))));
         MealResponse mealResponse = mealsFacade.getMeal(sandwichWithHam.id()).orElseThrow(ResourceNotFoundException::new);
 
+        //then
+        Mockito.verify(mealResponseKafkaProducer).send(sandwichWithHam);
         assertEquals("Kanapka z szynka", mealResponse.name());
         assertEquals(25.14, mealResponse.nutritionValues().carbons(), epsilon);
         assertEquals(9.925, mealResponse.nutritionValues().proteins(), epsilon);

@@ -22,24 +22,21 @@ import static pl.company.foodatu.plans.utils.PlansTestUtils.SANDWICH_WITH_HAM;
 import static pl.company.foodatu.plans.utils.PlansTestUtils.TODAY;
 import static pl.company.foodatu.plans.utils.PlansTestUtils.USER;
 
-@RunWith(MockitoJUnitRunner.class)
 class PlansTest {
 
-    @Mock
-    private MealsFacade mealsFacade;
+    private InMemoryAvailableMealsRepository availableMealsRepository = new InMemoryAvailableMealsRepository();
+    private PlansFacade plansFacade = new PlansConfiguration().plansInMemoryFacade(availableMealsRepository);
 
-    private PlansFacade plansFacade;
-
-
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        plansFacade = new PlansConfiguration().plansInMemoryFacade(mealsFacade);
-    }
     @Test
     void shouldAddMealToDayPlan() {
         //given
-        setUp();
-        Mockito.when(mealsFacade.getMeal(SANDWICH_WITH_CHEESE.id())).thenReturn(Optional.of(SANDWICH_WITH_CHEESE));
+        availableMealsRepository.save(new AvailableMeal(
+                SANDWICH_WITH_CHEESE.id(),
+                SANDWICH_WITH_CHEESE.name(),
+                SANDWICH_WITH_CHEESE.nutritionValues().carbons(),
+                SANDWICH_WITH_CHEESE.nutritionValues().proteins(),
+                SANDWICH_WITH_CHEESE.nutritionValues().fat()
+                ));
 
         //when
         plansFacade.addMealToPlan(new MealId(SANDWICH_WITH_CHEESE.id()), USER, TODAY);
@@ -53,10 +50,20 @@ class PlansTest {
     @Test
     void shouldAdd2MealsToDayPlan() {
         //given
-        setUp();
-        Mockito.when(mealsFacade.getMeal(SANDWICH_WITH_CHEESE.id())).thenReturn(Optional.of(SANDWICH_WITH_CHEESE));
-        Mockito.when(mealsFacade.getMeal(SANDWICH_WITH_HAM.id())).thenReturn(Optional.of(SANDWICH_WITH_HAM));
-
+        availableMealsRepository.save(new AvailableMeal(
+                SANDWICH_WITH_CHEESE.id(),
+                SANDWICH_WITH_CHEESE.name(),
+                SANDWICH_WITH_CHEESE.nutritionValues().carbons(),
+                SANDWICH_WITH_CHEESE.nutritionValues().proteins(),
+                SANDWICH_WITH_CHEESE.nutritionValues().fat()
+        ));
+        availableMealsRepository.save(new AvailableMeal(
+                SANDWICH_WITH_HAM.id(),
+                SANDWICH_WITH_HAM.name(),
+                SANDWICH_WITH_HAM.nutritionValues().carbons(),
+                SANDWICH_WITH_HAM.nutritionValues().proteins(),
+                SANDWICH_WITH_HAM.nutritionValues().fat()
+        ));
 
         //when
         plansFacade.addMealToPlan(new MealId(SANDWICH_WITH_CHEESE.id()), USER, TODAY);
@@ -71,8 +78,13 @@ class PlansTest {
     @Test
     void shouldNotAllowToAddMoreThan6MealsToDayPlan() {
         //given
-        setUp();
-        Mockito.when(mealsFacade.getMeal(SANDWICH_WITH_CHEESE.id())).thenReturn(Optional.of(SANDWICH_WITH_CHEESE));
+        availableMealsRepository.save(new AvailableMeal(
+                SANDWICH_WITH_CHEESE.id(),
+                SANDWICH_WITH_CHEESE.name(),
+                SANDWICH_WITH_CHEESE.nutritionValues().carbons(),
+                SANDWICH_WITH_CHEESE.nutritionValues().proteins(),
+                SANDWICH_WITH_CHEESE.nutritionValues().fat()
+        ));
         for (int i = 0; i < 6; i++) {
             plansFacade.addMealToPlan(new MealId(SANDWICH_WITH_CHEESE.id()), USER, TODAY);
         }
@@ -90,10 +102,20 @@ class PlansTest {
     @Test
     void shouldTellHowManyKcalInDayPlan() {
         //given
-        setUp();
-        Mockito.when(mealsFacade.getMeal(SANDWICH_WITH_CHEESE.id())).thenReturn(Optional.of(SANDWICH_WITH_CHEESE));
-        Mockito.when(mealsFacade.getMeal(SANDWICH_WITH_HAM.id())).thenReturn(Optional.of(SANDWICH_WITH_HAM));
-
+        availableMealsRepository.save(new AvailableMeal(
+                SANDWICH_WITH_CHEESE.id(),
+                SANDWICH_WITH_CHEESE.name(),
+                SANDWICH_WITH_CHEESE.nutritionValues().carbons(),
+                SANDWICH_WITH_CHEESE.nutritionValues().proteins(),
+                SANDWICH_WITH_CHEESE.nutritionValues().fat()
+        ));
+        availableMealsRepository.save(new AvailableMeal(
+                SANDWICH_WITH_HAM.id(),
+                SANDWICH_WITH_HAM.name(),
+                SANDWICH_WITH_HAM.nutritionValues().carbons(),
+                SANDWICH_WITH_HAM.nutritionValues().proteins(),
+                SANDWICH_WITH_HAM.nutritionValues().fat()
+        ));
         plansFacade.addMealToPlan(new MealId(SANDWICH_WITH_CHEESE.id()), USER, TODAY);
         plansFacade.addMealToPlan(new MealId(SANDWICH_WITH_HAM.id()), USER, TODAY);
 

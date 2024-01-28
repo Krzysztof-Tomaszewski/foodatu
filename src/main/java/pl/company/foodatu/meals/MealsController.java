@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import pl.company.foodatu.common.exception.ResourceNotFoundException;
 import pl.company.foodatu.meals.domain.MealsFacade;
 import pl.company.foodatu.meals.dto.MealCreateDTO;
 import pl.company.foodatu.meals.dto.MealResponse;
@@ -47,8 +46,7 @@ class MealsController {
 
     @GetMapping("meals/{id}")
     ResponseEntity<MealResponse> getMeals(@PathVariable UUID id) {
-        MealResponse mealResponse = mealsFacade.getMeal(id).orElseThrow(() -> new ResourceNotFoundException("Could not find meal with id: " + id));
-        return ResponseEntity.ok(mealResponse);
+        return ResponseEntity.of(mealsFacade.getMeal(id));
     }
 
     @PostMapping("meals")

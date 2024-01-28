@@ -1,5 +1,9 @@
 package pl.company.foodatu;
 
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,7 +17,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.HttpClientErrorException;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.MongoDBContainer;
 import pl.company.foodatu.common.utils.RestResponsePage;
 import pl.company.foodatu.meals.MealsClient;
 import pl.company.foodatu.meals.dto.MealCreateDTO;
@@ -24,9 +28,9 @@ import pl.company.foodatu.plans.PlansClient;
 import pl.company.foodatu.plans.dto.MealId;
 import pl.company.foodatu.plans.dto.PlanResponse;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,8 +41,6 @@ import static pl.company.foodatu.meals.utils.MealsTestUtils.BREAD;
 import static pl.company.foodatu.meals.utils.MealsTestUtils.BUTTER;
 import static pl.company.foodatu.meals.utils.MealsTestUtils.CHEESE;
 import static pl.company.foodatu.meals.utils.MealsTestUtils.HAM;
-import static pl.company.foodatu.plans.utils.PlansTestUtils.SANDWICH_WITH_CHEESE;
-import static pl.company.foodatu.plans.utils.PlansTestUtils.SANDWICH_WITH_HAM;
 import static pl.company.foodatu.plans.utils.PlansTestUtils.TODAY;
 import static pl.company.foodatu.plans.utils.PlansTestUtils.USER;
 
@@ -51,35 +53,37 @@ class FoodatuApplicationTests {
     @Autowired
     MealsClient mealsClient;
 
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
-            "postgres:15-alpine"
-    );
+
+    static MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:latest").withExposedPorts(27017);
+    static MongoClient mongoClient;
 
     @BeforeAll
     static void beforeAll() {
-        postgres.start();
+        mongoDBContainer.start();
+        mongoClient = MongoClients.create(mongoDBContainer.getReplicaSetUrl());
     }
 
     @BeforeEach
-    void beforeEach() throws IOException, InterruptedException {
-        postgres.execInContainer(
-                "psql",
-                "-U", postgres.getUsername(),
-                "-d", postgres.getDatabaseName(),
-                "-c", "TRUNCATE users, day_plan, planned_meal, std_product, product, meal CASCADE;"
-        );
+    void beforeEach() {
+        List<String> collections = List.of("meals", "std_products", "day_plans");
+
+        MongoDatabase database = mongoClient.getDatabase("test");
+        for (String collection : collections) {
+            database.getCollection(collection).deleteMany(new Document());
+        }
     }
 
     @AfterAll
     static void afterAll() {
-        postgres.stop();
+        mongoClient.close();
+        mongoDBContainer.stop();
     }
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
+        registry.add("spring.data.mongodb.database", () -> "test");
+        registry.add("spring.data.mongodb.port", () -> mongoDBContainer.getMappedPort(27017));
+        registry.add("spring.data.mongodb.host", mongoDBContainer::getHost);
     }
 
     @Test
@@ -326,43 +330,46 @@ class FoodatuApplicationTests {
     void addedMeal_then_planContains1MealAndItIsReturnedWithPlan() {
         //given
         UUID breadId = mealsClient.addStdProduct(BREAD).getBody().id();
-        MealResponse mealResponse = mealsClient.addMeal(new MealCreateDTO("kanapka",
-                List.of(new ProductCreateDTO(breadId, 30.0)))).getBody();
-        plansClient.addMealToPlan(new MealId(mealResponse.id()), USER.id(), TODAY);
+        String mealName = "kanapka";
+        addMealToPlanForToday(mealName, Map.of(breadId, 30.0));
 
         //when
         PlanResponse plan = plansClient.getPlanForDay(USER.id(), TODAY);
 
         //then
         assertEquals(1, plan.plannedMeals().size());
-        assertEquals(mealResponse.name(), plan.plannedMeals().get(0).name());
+        assertEquals(mealName, plan.plannedMeals().get(0).name());
     }
 
     @Test
     void added2MealsToPlan_then_shouldTellHowManyKCalInPlan() {
         //given
-        double epsilon = 0.000001d;
         UUID breadId = mealsClient.addStdProduct(BREAD).getBody().id();
         UUID butterId = mealsClient.addStdProduct(BUTTER).getBody().id();
         UUID cheeseId = mealsClient.addStdProduct(CHEESE).getBody().id();
         UUID hamId = mealsClient.addStdProduct(HAM).getBody().id();
-        MealResponse sandwichWithHam = mealsClient.addMeal(new MealCreateDTO("Kanapka z szynka",
-                List.of(new ProductCreateDTO(breadId, 50.0),
-                        new ProductCreateDTO(butterId, 10.0),
-                        new ProductCreateDTO(hamId, 30.0)))).getBody();
 
-        MealResponse sandwichWithCheese = mealsClient.addMeal(new MealCreateDTO("Kanapka z serem",
-                List.of(new ProductCreateDTO(breadId, 50.0),
-                        new ProductCreateDTO(butterId, 10.0),
-                        new ProductCreateDTO(cheeseId, 30.0)))).getBody();
-
-        plansClient.addMealToPlan(new MealId(sandwichWithCheese.id()), USER.id(), TODAY);
-        plansClient.addMealToPlan(new MealId(sandwichWithHam.id()), USER.id(), TODAY);
+        addMealToPlanForToday("Kanapka z szynka", Map.of(breadId, 50.0, butterId, 10.0, hamId, 30.0));
+        addMealToPlanForToday("Kanapka z serem", Map.of(breadId, 50.0, butterId, 10.0, cheeseId, 30.0));
 
         //when
         PlanResponse plan = plansClient.getPlanForDay(USER.id(), TODAY);
 
         //then
-        assertEquals(313.705 + 246.685, plan.getKCal(), epsilon);
+        assertKCal(313.705 + 246.685, plan.getKCal());
+    }
+
+    void addMealToPlanForToday(String mealName, Map<UUID, Double> products) {
+        MealResponse mealResponse = mealsClient.addMeal(new MealCreateDTO(mealName,
+                products.entrySet().stream()
+                        .map(product -> new ProductCreateDTO(product.getKey(), product.getValue()))
+                        .toList()
+        )).getBody();
+        plansClient.addMealToPlan(new MealId(mealResponse.id()), USER.id(), TODAY);
+    }
+
+    public static void assertKCal(double expected, double actual) {
+        double epsilon = 0.000001d;
+        assertEquals(expected, actual, epsilon);
     }
 }

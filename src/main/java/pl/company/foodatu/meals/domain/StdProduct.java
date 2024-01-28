@@ -1,18 +1,14 @@
 package pl.company.foodatu.meals.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import pl.company.foodatu.common.config.UuidIdentifiedEntity;
 import pl.company.foodatu.meals.dto.NullOrNegativeNutritionValuesException;
 
 import java.util.UUID;
 
-@Entity
-class StdProduct {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+@Document("std_products")
+class StdProduct extends UuidIdentifiedEntity {
+
     private String name;
     private Double proteins; //per 100g
     private Double carbons; //per 100g
@@ -34,7 +30,11 @@ class StdProduct {
         this.fat = fat;
     }
 
+
     void setId(UUID id) {
+        if (this.id != null) {
+            throw new UnsupportedOperationException("ID is already defined");
+        }
         this.id = id;
     }
 

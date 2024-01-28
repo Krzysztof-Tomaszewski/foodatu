@@ -28,7 +28,7 @@ public class PlansFacade {
 
         var dayPlan = repository
                 .find(user, day)
-                .orElse(new DayPlan(new User(user.id()), day, new ArrayList<>()));
+                .orElse(new DayPlan(user.id(), day, new ArrayList<>()));
 
         dayPlan.addMeal(new PlannedMeal(meal.name(), meal.nutritionValues().carbons(), meal.nutritionValues().proteins(), meal.nutritionValues().fat()));
         DayPlan savedPlan = repository.save(dayPlan);

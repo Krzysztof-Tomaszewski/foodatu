@@ -1,6 +1,6 @@
 package pl.company.foodatu.plans.domain;
 
-class PlannedMeal{
+class PlannedMeal {
 
     private String name;
     private Double carbons;

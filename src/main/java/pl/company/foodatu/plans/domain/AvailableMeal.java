@@ -1,12 +1,13 @@
 package pl.company.foodatu.plans.domain;
 
 import org.springframework.data.mongodb.core.mapping.Document;
-import pl.company.foodatu.common.config.UuidIdentifiedEntity;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Document("available_meals")
-class AvailableMeal extends UuidIdentifiedEntity {
+class AvailableMeal {
+    private String id;
     private String name;
     private Double carbons;
     private Double proteins;
@@ -16,15 +17,14 @@ class AvailableMeal extends UuidIdentifiedEntity {
 
     }
 
-    AvailableMeal(UUID id, String name, Double carbons, Double proteins, Double fat) {
-        this.id = id;
-        this.name = name;
-        this.carbons = carbons;
-        this.proteins = proteins;
-        this.fat = fat;
-    }
+    AvailableMeal(String id, String name, Double carbons, Double proteins, Double fat) {
+        Objects.requireNonNull(id);
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(carbons);
+        Objects.requireNonNull(proteins);
+        Objects.requireNonNull(fat);
 
-    AvailableMeal(String name, Double carbons, Double proteins, Double fat) {
+        this.id = id;
         this.name = name;
         this.carbons = carbons;
         this.proteins = proteins;
@@ -32,13 +32,7 @@ class AvailableMeal extends UuidIdentifiedEntity {
     }
 
     UUID getId() {
-        return id;
-    }
-    void setId(UUID id) {
-        if (this.id != null) {
-            throw new UnsupportedOperationException("ID is already defined");
-        }
-        this.id = id;
+        return UUID.fromString(this.id);
     }
 
     String getName() {

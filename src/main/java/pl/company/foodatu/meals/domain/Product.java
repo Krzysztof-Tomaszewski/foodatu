@@ -6,7 +6,7 @@ import pl.company.foodatu.meals.dto.Nutrition;
 
 import java.util.Objects;
 
-class Product{
+class Product {
 
     @DBRef
     private StdProduct stdProduct;
@@ -28,9 +28,9 @@ class Product{
     }
 
     Nutrition calculateNutritionValues() {
-        Double carbons =  (stdProduct.getCarbons()/100)*weight;
-        Double proteins =  (stdProduct.getProteins()/100)*weight;
-        Double fat =  (stdProduct.getFat()/100)*weight;
+        Double carbons = (stdProduct.getCarbons() / 100) * weight;
+        Double proteins = (stdProduct.getProteins() / 100) * weight;
+        Double fat = (stdProduct.getFat() / 100) * weight;
         return new Nutrition(carbons, proteins, fat);
     }
 }

@@ -9,10 +9,8 @@ class PlansConfiguration {
 
     @Bean
     @Profile("local")
-    PlansFacade plansInMemoryFacade(InMemoryAvailableMealsRepository inMemoryAvailableMealsRepository) {
-        if (inMemoryAvailableMealsRepository == null)
-            inMemoryAvailableMealsRepository = new InMemoryAvailableMealsRepository();
-        return new PlansFacade(new InMemoryDaysPlansRepository(), inMemoryAvailableMealsRepository);
+    PlansFacade plansInMemoryFacade() {
+        return new PlansFacade(new InMemoryDaysPlansRepository(), new InMemoryAvailableMealsRepository());
     }
 
     @Bean

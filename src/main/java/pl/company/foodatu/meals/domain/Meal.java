@@ -1,7 +1,6 @@
 package pl.company.foodatu.meals.domain;
 
 import org.springframework.data.mongodb.core.mapping.Document;
-import pl.company.foodatu.common.config.UuidIdentifiedEntity;
 import pl.company.foodatu.meals.dto.Nutrition;
 
 import java.util.List;
@@ -9,10 +8,11 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Document("meals")
-class Meal extends UuidIdentifiedEntity {
+class Meal {
 
     static final int MAX_PRODUCTS = 10;
 
+    private String id;
     private String name;
 
     private List<Product> products;
@@ -20,7 +20,8 @@ class Meal extends UuidIdentifiedEntity {
     private Meal() {
     }
 
-    Meal(String name, List<Product> products) {
+    Meal(String id, String name, List<Product> products) {
+        Objects.requireNonNull(id);
         Objects.requireNonNull(name);
         Objects.requireNonNull(products);
 
@@ -32,19 +33,13 @@ class Meal extends UuidIdentifiedEntity {
             throw new TooManyProductsInOneMealException();
         }
 
+        this.id = id;
         this.name = name;
         this.products = products;
     }
 
-    void setId(UUID id) {
-        if (this.id != null) {
-            throw new UnsupportedOperationException("ID is already defined");
-        }
-        this.id = id;
-    }
-
     UUID getId() {
-        return this.id;
+        return UUID.fromString(this.id);
     }
 
     String getName() {

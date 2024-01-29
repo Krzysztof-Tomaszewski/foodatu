@@ -11,18 +11,14 @@ class InMemoryAvailableMealsRepository implements AvailableMealsRepository {
 
     @Override
     public AvailableMeal save(AvailableMeal meal) {
-        if(meal.getId() == null) {
-            UUID uuid = UUID.randomUUID();
-            meal.setId(uuid);
-        }
         memory.put(meal.getId(), meal);
         return meal;
     }
 
 
     @Override
-    public Optional<AvailableMeal> findById(UUID id) {
-        return Optional.ofNullable(memory.get(id));
+    public Optional<AvailableMeal> findById(String id) {
+        return Optional.ofNullable(memory.get(UUID.fromString(id)));
     }
 
 

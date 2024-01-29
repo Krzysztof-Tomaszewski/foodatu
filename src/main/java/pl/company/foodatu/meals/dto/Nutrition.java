@@ -6,7 +6,7 @@ public record Nutrition(
         Double fat
 ) {
     public Nutrition {
-        if (carbons == null || proteins == null  || fat == null  ||
+        if (carbons == null || proteins == null || fat == null ||
                 carbons < 0 || proteins < 0 || fat < 0) {
             throw new NullOrNegativeNutritionValuesException();
         }

@@ -8,6 +8,7 @@ import pl.company.foodatu.meals.dto.MealCreateDTO;
 import pl.company.foodatu.meals.dto.MealResponse;
 import pl.company.foodatu.meals.dto.StdProductCreateDTO;
 import pl.company.foodatu.meals.dto.StdProductResponse;
+import pl.company.foodatu.meals.infrastructure.MealPublisher;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,16 +18,18 @@ public class MealsFacade {
 
     private final MealsRepository mealsRepository;
     private final StdProductsRepository stdProductsRepository;
-    private final MealResponseKafkaProducer mealResponseKafkaProducer;
+    private final MealPublisher mealPublisher;
+    private final MealFactory mealFactory;
 
-    public MealsFacade(MealsRepository mealsRepository, StdProductsRepository stdProductsRepository, MealResponseKafkaProducer mealResponseKafkaProducer) {
+    public MealsFacade(MealsRepository mealsRepository, StdProductsRepository stdProductsRepository, MealPublisher mealPublisher) {
         this.mealsRepository = mealsRepository;
         this.stdProductsRepository = stdProductsRepository;
-        this.mealResponseKafkaProducer = mealResponseKafkaProducer;
+        this.mealPublisher = mealPublisher;
+        this.mealFactory = new MealFactory();
     }
 
     public StdProductResponse addStdProduct(@Valid StdProductCreateDTO stdProduct) {
-        StdProduct savedStdProduct = stdProductsRepository.save(new StdProduct(stdProduct.name(), stdProduct.nutritionPer100g().proteins(), stdProduct.nutritionPer100g().carbons(), stdProduct.nutritionPer100g().fat()));
+        StdProduct savedStdProduct = stdProductsRepository.save(new StdProduct(UUID.randomUUID().toString(), stdProduct.name(), stdProduct.nutritionPer100g().proteins(), stdProduct.nutritionPer100g().carbons(), stdProduct.nutritionPer100g().fat()));
         return new StdProductResponse(savedStdProduct.getId(), savedStdProduct.getName());
     }
 
@@ -42,14 +45,14 @@ public class MealsFacade {
     public MealResponse addMeal(MealCreateDTO meal) {
         List<Product> products = meal.products().stream()
                 .map(productCreateDTO -> {
-                    StdProduct stdProduct = stdProductsRepository.findById(productCreateDTO.id())
+                    StdProduct stdProduct = stdProductsRepository.findById(productCreateDTO.id().toString())
                             .orElseThrow(() -> new ResourceNotFoundException("Could not find product with id: " + productCreateDTO.id()));
                     return new Product(stdProduct, productCreateDTO.weight());
                 })
                 .toList();
-        Meal savedMeal = mealsRepository.save(new Meal(meal.name(), products));
+        Meal savedMeal = mealsRepository.save(mealFactory.createMeal(meal.name(), products));
         MealResponse mealResponse = new MealResponse(savedMeal.getId(), savedMeal.getName(), savedMeal.calculateNutritionValues());
-        mealResponseKafkaProducer.send(mealResponse);
+        mealPublisher.publishNewMeal(mealResponse);
         return mealResponse;
     }
 
@@ -63,7 +66,7 @@ public class MealsFacade {
     }
 
     public Optional<MealResponse> getMeal(UUID id) {
-        return mealsRepository.findById(id)
+        return mealsRepository.findById(id.toString())
                 .map(meal -> new MealResponse(meal.getId(), meal.getName(), meal.calculateNutritionValues()));
 
     }

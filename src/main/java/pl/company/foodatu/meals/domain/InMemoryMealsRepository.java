@@ -16,9 +16,7 @@ class InMemoryMealsRepository implements MealsRepository {
 
     @Override
     public Meal save(Meal meal) {
-        UUID uuid = UUID.randomUUID();
-        meal.setId(uuid);
-        memory.put(uuid, meal);
+        memory.put(meal.getId(), meal);
         return meal;
     }
 
@@ -29,8 +27,8 @@ class InMemoryMealsRepository implements MealsRepository {
     }
 
     @Override
-    public Optional<Meal> findById(UUID id) {
-        return Optional.ofNullable(memory.get(id));
+    public Optional<Meal> findById(String id) {
+        return Optional.ofNullable(memory.get(UUID.fromString(id)));
     }
 
 

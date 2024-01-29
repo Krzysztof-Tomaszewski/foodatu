@@ -16,9 +16,7 @@ class InMemoryStdProductsRepository implements StdProductsRepository {
 
     @Override
     public StdProduct save(StdProduct stdProduct) {
-        UUID uuid = UUID.randomUUID();
-        stdProduct.setId(uuid);
-        memory.put(uuid, stdProduct);
+        memory.put(stdProduct.getId(), stdProduct);
         return stdProduct;
     }
 
@@ -29,7 +27,7 @@ class InMemoryStdProductsRepository implements StdProductsRepository {
     }
 
     @Override
-    public Optional<StdProduct> findById(UUID id) {
-        return Optional.ofNullable(memory.get(id));
+    public Optional<StdProduct> findById(String id) {
+        return Optional.ofNullable(memory.get(UUID.fromString(id)));
     }
 }

@@ -3,6 +3,7 @@ package pl.company.foodatu;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
+import org.awaitility.Awaitility;
 import org.bson.Document;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -373,12 +374,16 @@ class FoodatuApplicationTests {
                         .map(product -> new ProductCreateDTO(product.getKey(), product.getValue()))
                         .toList()
         )).getBody();
-        try {
-            TimeUnit.SECONDS.sleep(1);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        plansClient.addMealToPlan(new MealId(mealResponse.id()), USER.id(), TODAY);
+        Awaitility.await().atMost(3, TimeUnit.SECONDS)
+                .until(() -> {
+                    plansClient.addMealToPlan(new MealId(mealResponse.id()), USER.id(), TODAY);
+                    return true;
+                });
+//        try {
+//            TimeUnit.SECONDS.sleep(1);
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     public static void assertKCal(double expected, double actual) {

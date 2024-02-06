@@ -17,6 +17,7 @@ class InMemoryMealPublisher implements MealPublisher {
     @Override
     public void publishNewMeal(MealResponse mealResponse) {
         memory.offer(mealResponse);
+        logger.info("Published meal: {}", mealResponse.name());
     }
 
     MealResponse pollNextPublishedMeal() {

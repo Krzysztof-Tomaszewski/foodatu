@@ -7,7 +7,6 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 import pl.company.foodatu.meals.dto.MealEvent;
-import pl.company.foodatu.meals.dto.RestMealResponse;
 import pl.company.foodatu.plans.domain.PlansFacade;
 
 import java.util.List;

@@ -1,11 +1,14 @@
-package pl.company.foodatu.plans.domain;
+package pl.company.foodatu.plans.infrastructure;
+
+import pl.company.foodatu.plans.domain.AvailableMeal;
+import pl.company.foodatu.plans.domain.AvailableMealsRepository;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-class InMemoryAvailableMealsRepository implements AvailableMealsRepository {
+public class InMemoryAvailableMealsRepository implements AvailableMealsRepository {
 
     Map<UUID, AvailableMeal> memory = new HashMap<>();
 

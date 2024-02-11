@@ -3,6 +3,7 @@ package pl.company.foodatu.plans.domain;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import pl.company.foodatu.plans.infrastructure.InMemoryAvailableMealsRepository;
 
 @Configuration
 class PlansConfiguration {

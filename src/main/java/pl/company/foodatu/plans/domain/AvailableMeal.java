@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Document("available_meals")
-class AvailableMeal {
+public class AvailableMeal {
     private String id;
     private String name;
     private Double carbons;
@@ -31,7 +31,7 @@ class AvailableMeal {
         this.fat = fat;
     }
 
-    UUID getId() {
+    public UUID getId() {
         return UUID.fromString(this.id);
     }
 

@@ -1,15 +1,13 @@
-package pl.company.foodatu.meals.domain;
+package pl.company.foodatu.meals.infrastructure;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.company.foodatu.meals.dto.MealEvent;
-import pl.company.foodatu.meals.dto.RestMealResponse;
-import pl.company.foodatu.meals.infrastructure.MealPublisher;
 
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 
-class InMemoryMealPublisher implements MealPublisher {
+public class InMemoryMealPublisher implements MealPublisher {
 
     private static final Logger logger = LoggerFactory.getLogger(InMemoryMealPublisher.class);
 
@@ -21,7 +19,7 @@ class InMemoryMealPublisher implements MealPublisher {
         logger.info("Published meal: {}", mealEvent.name());
     }
 
-    MealEvent pollNextPublishedMeal() {
+    public MealEvent pollNextPublishedMeal() {
         return memory.poll();
     }
 }

@@ -1,7 +1,6 @@
 package pl.company.foodatu.meals.domain;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import pl.company.foodatu.common.exception.ResourceNotFoundException;
 import pl.company.foodatu.meals.dto.MealCreateDTO;
 import pl.company.foodatu.meals.dto.MealEvent;
@@ -12,6 +11,7 @@ import pl.company.foodatu.meals.dto.ProductCreateDTO;
 import pl.company.foodatu.meals.dto.RestMealResponse;
 import pl.company.foodatu.meals.dto.StdProductCreateDTO;
 import pl.company.foodatu.meals.dto.StdProductResponse;
+import pl.company.foodatu.meals.infrastructure.InMemoryMealPublisher;
 
 import java.util.ArrayList;
 import java.util.List;

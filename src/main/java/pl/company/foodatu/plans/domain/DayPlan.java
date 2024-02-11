@@ -1,26 +1,28 @@
 package pl.company.foodatu.plans.domain;
 
 import org.springframework.data.mongodb.core.mapping.Document;
-import pl.company.foodatu.common.config.UuidIdentifiedEntity;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
 @Document("day_plans")
-final class DayPlan extends UuidIdentifiedEntity {
+final class DayPlan {
     public static final int MAX_MEALS = 6;
 
+    private String id;
     private String userId;
     private LocalDate localDate;
 
     private List<PlannedMeal> plannedMeals;
 
     DayPlan(
+            String id,
             String userId,
             LocalDate localDate,
             List<PlannedMeal> plannedMeals
     ) {
+        this.id = id;
         this.userId = userId;
         this.localDate = localDate;
         this.plannedMeals = plannedMeals;
@@ -63,12 +65,13 @@ final class DayPlan extends UuidIdentifiedEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId, localDate, plannedMeals);
+        return Objects.hash(id, userId, localDate, plannedMeals);
     }
 
     @Override
     public String toString() {
         return "DayPlan[" +
+                "id=" + id + ", " +
                 "userId=" + userId + ", " +
                 "localDate=" + localDate + ", " +
                 "plannedMeals=" + plannedMeals + ']';

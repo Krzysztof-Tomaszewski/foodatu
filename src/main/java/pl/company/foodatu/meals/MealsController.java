@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pl.company.foodatu.meals.domain.MealsFacade;
 import pl.company.foodatu.meals.dto.MealCreateDTO;
-import pl.company.foodatu.meals.dto.MealResponse;
+import pl.company.foodatu.meals.dto.RestMealResponse;
 import pl.company.foodatu.meals.dto.StdProductCreateDTO;
 import pl.company.foodatu.meals.dto.StdProductResponse;
 
@@ -40,17 +40,17 @@ class MealsController {
     }
 
     @GetMapping("meals")
-    ResponseEntity<Page<MealResponse>> getMeals(Pageable pageable) {
+    ResponseEntity<Page<RestMealResponse>> getMeals(Pageable pageable) {
         return ResponseEntity.ok(mealsFacade.getMeals(pageable));
     }
 
     @GetMapping("meals/{id}")
-    ResponseEntity<MealResponse> getMeals(@PathVariable UUID id) {
+    ResponseEntity<RestMealResponse> getMeals(@PathVariable UUID id) {
         return ResponseEntity.of(mealsFacade.getMeal(id));
     }
 
     @PostMapping("meals")
-    ResponseEntity<MealResponse> addMeal(@RequestBody @Valid MealCreateDTO mealCreateDTO) {
+    ResponseEntity<RestMealResponse> addMeal(@RequestBody @Valid MealCreateDTO mealCreateDTO) {
         return new ResponseEntity<>(mealsFacade.addMeal(mealCreateDTO), HttpStatus.CREATED);
     }
 

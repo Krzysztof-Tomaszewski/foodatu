@@ -3,14 +3,15 @@ package pl.company.foodatu.meals.domain;
 import org.junit.jupiter.api.Test;
 import pl.company.foodatu.common.exception.ResourceNotFoundException;
 import pl.company.foodatu.meals.dto.MealCreateDTO;
-import pl.company.foodatu.meals.dto.MealResponse;
+import pl.company.foodatu.meals.dto.MealEvent;
 import pl.company.foodatu.meals.dto.NullOrNegativeNutritionValuesException;
 import pl.company.foodatu.meals.dto.NullOrNegativeProductsWeightException;
 import pl.company.foodatu.meals.dto.Nutrition;
 import pl.company.foodatu.meals.dto.ProductCreateDTO;
+import pl.company.foodatu.meals.dto.RestMealResponse;
 import pl.company.foodatu.meals.dto.StdProductCreateDTO;
 import pl.company.foodatu.meals.dto.StdProductResponse;
-import pl.company.foodatu.plans.utils.PlansTestUtils;
+import pl.company.foodatu.meals.infrastructure.InMemoryMealPublisher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,9 @@ import static pl.company.foodatu.plans.utils.PlansTestUtils.SANDWICH_WITH_HAM;
 
 class MealsTest {
 
-    private MealsFacade mealsFacade = new MealsConfiguration().mealsInMemoryFacade();
+
+    private final InMemoryMealPublisher inMemoryMealPublisher = new InMemoryMealPublisher();
+    private final MealsFacade mealsFacade = new MealsConfiguration().mealsInMemoryFacade(inMemoryMealPublisher);
 
     @Test
     void shouldAdd2StdProductsAndReturnListContainingTheseProducts() {
@@ -58,15 +61,15 @@ class MealsTest {
         StdProductResponse cheeseProductResponse = mealsFacade.addStdProduct(CHEESE);
 
         //when
-        MealResponse sandwichWithHam = mealsFacade.addMeal(new MealCreateDTO("Kanapka z szynka", List.of(
+        RestMealResponse sandwichWithHam = mealsFacade.addMeal(new MealCreateDTO("Kanapka z szynka", List.of(
                 new ProductCreateDTO(breadProductResponse.id(), 50.0),
                 new ProductCreateDTO(hamProductResponse.id(), 30.0),
                 new ProductCreateDTO(butterProductResponse.id(), 10.0))));
-        MealResponse sandwichWithCheese = mealsFacade.addMeal(new MealCreateDTO("Kanapka z serem", List.of(
+        RestMealResponse sandwichWithCheese = mealsFacade.addMeal(new MealCreateDTO("Kanapka z serem", List.of(
                 new ProductCreateDTO(breadProductResponse.id(), 50.0),
                 new ProductCreateDTO(cheeseProductResponse.id(), 30.0),
                 new ProductCreateDTO(butterProductResponse.id(), 10.0))));
-        List<MealResponse> meals = mealsFacade.getMeals().getContent();
+        List<RestMealResponse> meals = mealsFacade.getMeals().getContent();
 
         //then
         assertEquals("Kanapka z szynka", sandwichWithHam.name());
@@ -82,6 +85,9 @@ class MealsTest {
         assertTrue(meals.contains(sandwichWithHam));
         assertTrue(meals.contains(sandwichWithCheese));
         assertEquals(2, meals.size());
+
+        assertEquals(new MealEvent(sandwichWithHam), inMemoryMealPublisher.pollNextPublishedMeal());
+        assertEquals(new MealEvent(sandwichWithCheese), inMemoryMealPublisher.pollNextPublishedMeal());
     }
 
     @Test
@@ -93,22 +99,25 @@ class MealsTest {
         StdProductResponse hamProductResponse = mealsFacade.addStdProduct(HAM);
 
         //when
-        MealResponse sandwichWithHam = mealsFacade.addMeal(new MealCreateDTO("Kanapka z szynka", List.of(
+        RestMealResponse sandwichWithHam = mealsFacade.addMeal(new MealCreateDTO("Kanapka z szynka", List.of(
                 new ProductCreateDTO(breadProductResponse.id(), 50.0),
                 new ProductCreateDTO(hamProductResponse.id(), 30.0),
                 new ProductCreateDTO(butterProductResponse.id(), 10.0))));
-        MealResponse mealResponse = mealsFacade.getMeal(sandwichWithHam.id()).orElseThrow(ResourceNotFoundException::new);
+        RestMealResponse mealResponse = mealsFacade.getMeal(sandwichWithHam.id()).orElseThrow(ResourceNotFoundException::new);
 
+        //then
         assertEquals("Kanapka z szynka", mealResponse.name());
         assertEquals(25.14, mealResponse.nutritionValues().carbons(), epsilon);
         assertEquals(9.925, mealResponse.nutritionValues().proteins(), epsilon);
         assertEquals(11.825, mealResponse.nutritionValues().fat(), epsilon);
         assertEquals(sandwichWithHam, mealResponse);
+
+        assertEquals(new MealEvent(sandwichWithHam), inMemoryMealPublisher.pollNextPublishedMeal());
     }
 
     @Test
     void getNotExistingInDbMeal_shouldReturnEmptyOptional() {
-        Optional<MealResponse> mealResponse = mealsFacade.getMeal(SANDWICH_WITH_HAM.id());
+        Optional<RestMealResponse> mealResponse = mealsFacade.getMeal(SANDWICH_WITH_HAM.id());
         assertTrue(mealResponse.isEmpty());
     }
 
@@ -126,7 +135,7 @@ class MealsTest {
 
         //then
         assertThrows(TooManyProductsInOneMealException.class, runnable::run);
-        List<MealResponse> meals = mealsFacade.getMeals().getContent();
+        List<RestMealResponse> meals = mealsFacade.getMeals().getContent();
         assertTrue(meals.isEmpty());
     }
 
@@ -141,7 +150,7 @@ class MealsTest {
 
         //then
         assertThrows(NullOrNegativeProductsWeightException.class, runnable::run);
-        List<MealResponse> meals = mealsFacade.getMeals().getContent();
+        List<RestMealResponse> meals = mealsFacade.getMeals().getContent();
         assertTrue(meals.isEmpty());
     }
 
@@ -156,7 +165,7 @@ class MealsTest {
 
         //then
         assertThrows(NullOrNegativeProductsWeightException.class, runnable::run);
-        List<MealResponse> meals = mealsFacade.getMeals().getContent();
+        List<RestMealResponse> meals = mealsFacade.getMeals().getContent();
         assertTrue(meals.isEmpty());
     }
 
@@ -167,7 +176,7 @@ class MealsTest {
 
         //then
         assertThrows(MealWithZeroProductsException.class, runnable::run);
-        List<MealResponse> meals = mealsFacade.getMeals().getContent();
+        List<RestMealResponse> meals = mealsFacade.getMeals().getContent();
         assertTrue(meals.isEmpty());
     }
 
@@ -181,7 +190,7 @@ class MealsTest {
 
         //then
         assertThrows(ResourceNotFoundException.class, runnable::run);
-        List<MealResponse> meals = mealsFacade.getMeals().getContent();
+        List<RestMealResponse> meals = mealsFacade.getMeals().getContent();
         assertTrue(meals.isEmpty());
     }
 

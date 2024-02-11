@@ -1,8 +1,8 @@
 package pl.company.foodatu.plans.domain;
 
 import pl.company.foodatu.common.exception.ResourceNotFoundException;
-import pl.company.foodatu.meals.domain.MealsFacade;
-import pl.company.foodatu.meals.dto.MealResponse;
+import pl.company.foodatu.meals.dto.MealEvent;
+import pl.company.foodatu.meals.dto.RestMealResponse;
 import pl.company.foodatu.plans.dto.MealId;
 import pl.company.foodatu.plans.dto.PlanResponse;
 import pl.company.foodatu.plans.dto.PlannedMealResponse;
@@ -11,32 +11,37 @@ import pl.company.foodatu.plans.dto.UserId;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class PlansFacade {
 
-    private final DaysPlansRepository repository;
-    private final MealsFacade mealsFacade;
+    private final DaysPlansRepository daysPlansRepository;
+    private final AvailableMealsRepository availableMealsRepository;
 
-    public PlansFacade(DaysPlansRepository repository, MealsFacade mealsFacade) {
-        this.repository = repository;
-        this.mealsFacade = mealsFacade;
+    public PlansFacade(DaysPlansRepository daysPlansRepository, AvailableMealsRepository availableMealsRepository) {
+        this.daysPlansRepository = daysPlansRepository;
+        this.availableMealsRepository = availableMealsRepository;
+    }
+
+    public void addAvailableMeal(MealEvent meal) {
+        availableMealsRepository.save(new AvailableMeal(meal.id().toString(), meal.name(), meal.nutritionValues().carbons(), meal.nutritionValues().proteins(), meal.nutritionValues().fat()));
     }
 
     public PlanResponse addMealToPlan(MealId mealId, UserId user, LocalDate day) {
 
-        MealResponse meal = mealsFacade.getMeal(mealId.id()).orElseThrow(() -> new ResourceNotFoundException("Could not find meal with id: " + mealId.id()));
+        AvailableMeal meal = availableMealsRepository.findById(mealId.id().toString()).orElseThrow(() -> new ResourceNotFoundException("Could not find meal with id: " + mealId.id()));
 
-        var dayPlan = repository
+        var dayPlan = daysPlansRepository
                 .find(user, day)
-                .orElse(new DayPlan(user.id(), day, new ArrayList<>()));
+                .orElse(new DayPlan(UUID.randomUUID().toString(), user.id(), day, new ArrayList<>()));
 
-        dayPlan.addMeal(new PlannedMeal(meal.name(), meal.nutritionValues().carbons(), meal.nutritionValues().proteins(), meal.nutritionValues().fat()));
-        DayPlan savedPlan = repository.save(dayPlan);
+        dayPlan.addMeal(new PlannedMeal(meal.getName(), meal.getCarbons(), meal.getProteins(), meal.getFat()));
+        DayPlan savedPlan = daysPlansRepository.save(dayPlan);
         return new PlanResponse(getPlannedMeals(savedPlan), savedPlan.calculateKCal());
     }
 
     public PlanResponse getPlanForDay(UserId user, LocalDate day) {
-        return repository.find(user, day)
+        return daysPlansRepository.find(user, day)
                 .map(dayPlan -> new PlanResponse(getPlannedMeals(dayPlan), dayPlan.calculateKCal()))
                 .orElse(PlanResponse.empty());
     }

@@ -5,5 +5,24 @@ spring:
   data:
     mongodb:
       uuid-representation: standard
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKER}
+    consumer:
+      group-id: ${KAFKA_USERNAME:kafka}-consumers
+      auto-offset-reset: latest
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: pl.company.foodatu.meals.dto
+    producer:
+      acks: 1
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
 server:
   port: 8080
+
+foodatu:
+  kafka:
+    topic: ${KAFKA_USERNAME:kafka}-default

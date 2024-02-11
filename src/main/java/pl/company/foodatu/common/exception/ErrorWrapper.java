@@ -15,7 +15,7 @@ public class ErrorWrapper {
     }
 
     public ErrorWrapper addError(Error error) {
-        if(this.errors == null) {
+        if (this.errors == null) {
             this.errors = new ArrayList<>();
         }
         this.errors.add(error);

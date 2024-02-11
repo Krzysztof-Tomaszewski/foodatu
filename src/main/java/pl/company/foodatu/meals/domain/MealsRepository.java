@@ -4,7 +4,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
-import java.util.UUID;
 
 interface MealsRepository {
 
@@ -12,5 +11,5 @@ interface MealsRepository {
 
     Page<Meal> findAll(Pageable pageable);
 
-    Optional<Meal> findById(UUID id);
+    Optional<Meal> findById(String id);
 }

@@ -24,8 +24,8 @@ import org.testcontainers.utility.DockerImageName;
 import pl.company.foodatu.common.utils.RestResponsePage;
 import pl.company.foodatu.meals.MealsClient;
 import pl.company.foodatu.meals.dto.MealCreateDTO;
-import pl.company.foodatu.meals.dto.RestMealResponse;
 import pl.company.foodatu.meals.dto.ProductCreateDTO;
+import pl.company.foodatu.meals.dto.RestMealResponse;
 import pl.company.foodatu.meals.dto.StdProductResponse;
 import pl.company.foodatu.plans.PlansClient;
 import pl.company.foodatu.plans.dto.MealId;
@@ -374,16 +374,17 @@ class FoodatuApplicationTests {
                         .map(product -> new ProductCreateDTO(product.getKey(), product.getValue()))
                         .toList()
         )).getBody();
-        Awaitility.await().atMost(3, TimeUnit.SECONDS)
+        Awaitility.await()
+                .atMost(3, TimeUnit.SECONDS)
                 .until(() -> {
-                    plansClient.addMealToPlan(new MealId(mealResponse.id()), USER.id(), TODAY);
+                    try {
+                        plansClient.addMealToPlan(new MealId(mealResponse.id()), USER.id(), TODAY);
+                    } catch (HttpClientErrorException e) {
+                        return false;
+                    }
                     return true;
                 });
-//        try {
-//            TimeUnit.SECONDS.sleep(1);
-//        } catch (InterruptedException e) {
-//            throw new RuntimeException(e);
-//        }
+
     }
 
     public static void assertKCal(double expected, double actual) {

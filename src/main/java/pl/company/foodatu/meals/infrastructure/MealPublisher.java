@@ -1,8 +1,8 @@
 package pl.company.foodatu.meals.infrastructure;
 
-import pl.company.foodatu.meals.dto.MealResponse;
+import pl.company.foodatu.meals.dto.MealEvent;
 
 public interface MealPublisher {
 
-    void publishNewMeal(MealResponse mealResponse);
+    void publishNewMeal(MealEvent mealEvent);
 }

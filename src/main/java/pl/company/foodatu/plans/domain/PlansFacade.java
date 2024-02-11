@@ -1,7 +1,8 @@
 package pl.company.foodatu.plans.domain;
 
 import pl.company.foodatu.common.exception.ResourceNotFoundException;
-import pl.company.foodatu.meals.dto.MealResponse;
+import pl.company.foodatu.meals.dto.MealEvent;
+import pl.company.foodatu.meals.dto.RestMealResponse;
 import pl.company.foodatu.plans.dto.MealId;
 import pl.company.foodatu.plans.dto.PlanResponse;
 import pl.company.foodatu.plans.dto.PlannedMealResponse;
@@ -22,7 +23,7 @@ public class PlansFacade {
         this.availableMealsRepository = availableMealsRepository;
     }
 
-    public void addAvailableMeal(MealResponse meal) {
+    public void addAvailableMeal(MealEvent meal) {
         availableMealsRepository.save(new AvailableMeal(meal.id().toString(), meal.name(), meal.nutritionValues().carbons(), meal.nutritionValues().proteins(), meal.nutritionValues().fat()));
     }
 

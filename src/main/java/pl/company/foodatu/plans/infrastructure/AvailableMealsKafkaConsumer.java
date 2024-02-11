@@ -6,7 +6,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
-import pl.company.foodatu.meals.dto.MealResponse;
+import pl.company.foodatu.meals.dto.MealEvent;
+import pl.company.foodatu.meals.dto.RestMealResponse;
 import pl.company.foodatu.plans.domain.PlansFacade;
 
 import java.util.List;
@@ -22,7 +23,7 @@ class AvailableMealsKafkaConsumer {
     }
 
     @KafkaListener(topics = "${foodatu.kafka.topic}")
-    void processMeal(MealResponse meal,
+    void processMeal(MealEvent meal,
                      @Header(KafkaHeaders.RECEIVED_PARTITION) List<Integer> partitions,
                      @Header(KafkaHeaders.RECEIVED_TOPIC) List<String> topics,
                      @Header(KafkaHeaders.OFFSET) List<Long> offsets) {

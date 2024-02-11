@@ -5,7 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import pl.company.foodatu.common.exception.ResourceNotFoundException;
 import pl.company.foodatu.meals.dto.MealCreateDTO;
-import pl.company.foodatu.meals.dto.MealResponse;
+import pl.company.foodatu.meals.dto.MealEvent;
+import pl.company.foodatu.meals.dto.RestMealResponse;
 import pl.company.foodatu.meals.dto.StdProductCreateDTO;
 import pl.company.foodatu.meals.dto.StdProductResponse;
 import pl.company.foodatu.meals.infrastructure.MealPublisher;
@@ -42,7 +43,7 @@ public class MealsFacade {
                 .map(stdProduct -> new StdProductResponse(stdProduct.getId(), stdProduct.getName()));
     }
 
-    public MealResponse addMeal(MealCreateDTO meal) {
+    public RestMealResponse addMeal(MealCreateDTO meal) {
         List<Product> products = meal.products().stream()
                 .map(productCreateDTO -> {
                     StdProduct stdProduct = stdProductsRepository.findById(productCreateDTO.id().toString())
@@ -51,23 +52,23 @@ public class MealsFacade {
                 })
                 .toList();
         Meal savedMeal = mealsRepository.save(mealFactory.createMeal(meal.name(), products));
-        MealResponse mealResponse = new MealResponse(savedMeal.getId(), savedMeal.getName(), savedMeal.calculateNutritionValues());
-        mealPublisher.publishNewMeal(mealResponse);
+        RestMealResponse mealResponse = new RestMealResponse(savedMeal.getId(), savedMeal.getName(), savedMeal.calculateNutritionValues());
+        mealPublisher.publishNewMeal(new MealEvent(mealResponse.id(), mealResponse.name(), mealResponse.nutritionValues()));
         return mealResponse;
     }
 
-    public Page<MealResponse> getMeals() {
+    public Page<RestMealResponse> getMeals() {
         return getMeals(Pageable.unpaged());
     }
 
-    public Page<MealResponse> getMeals(Pageable pageable) {
+    public Page<RestMealResponse> getMeals(Pageable pageable) {
         return mealsRepository.findAll(pageable)
-                .map(meal -> new MealResponse(meal.getId(), meal.getName(), meal.calculateNutritionValues()));
+                .map(meal -> new RestMealResponse(meal.getId(), meal.getName(), meal.calculateNutritionValues()));
     }
 
-    public Optional<MealResponse> getMeal(UUID id) {
+    public Optional<RestMealResponse> getMeal(UUID id) {
         return mealsRepository.findById(id.toString())
-                .map(meal -> new MealResponse(meal.getId(), meal.getName(), meal.calculateNutritionValues()));
+                .map(meal -> new RestMealResponse(meal.getId(), meal.getName(), meal.calculateNutritionValues()));
 
     }
 }

@@ -24,7 +24,7 @@ import org.testcontainers.utility.DockerImageName;
 import pl.company.foodatu.common.utils.RestResponsePage;
 import pl.company.foodatu.meals.MealsClient;
 import pl.company.foodatu.meals.dto.MealCreateDTO;
-import pl.company.foodatu.meals.dto.MealResponse;
+import pl.company.foodatu.meals.dto.RestMealResponse;
 import pl.company.foodatu.meals.dto.ProductCreateDTO;
 import pl.company.foodatu.meals.dto.StdProductResponse;
 import pl.company.foodatu.plans.PlansClient;
@@ -116,10 +116,10 @@ class FoodatuApplicationTests {
     void addedMeal_then_mealListContains1Meal() {
         //given
         UUID breadId = mealsClient.addStdProduct(BREAD).getBody().id();
-        ResponseEntity<MealResponse> mealResponseEntity = mealsClient.addMeal(new MealCreateDTO("kanapka", List.of(new ProductCreateDTO(breadId, 30.0))));
+        ResponseEntity<RestMealResponse> mealResponseEntity = mealsClient.addMeal(new MealCreateDTO("kanapka", List.of(new ProductCreateDTO(breadId, 30.0))));
 
         //when
-        ResponseEntity<RestResponsePage<MealResponse>> mealListResponseEntity = mealsClient.getMeals();
+        ResponseEntity<RestResponsePage<RestMealResponse>> mealListResponseEntity = mealsClient.getMeals();
 
         //then
         assertEquals(HttpStatus.CREATED, mealResponseEntity.getStatusCode());
@@ -369,7 +369,7 @@ class FoodatuApplicationTests {
     }
 
     void addMealToPlanForToday(String mealName, Map<UUID, Double> products) {
-        MealResponse mealResponse = mealsClient.addMeal(new MealCreateDTO(mealName,
+        RestMealResponse mealResponse = mealsClient.addMeal(new MealCreateDTO(mealName,
                 products.entrySet().stream()
                         .map(product -> new ProductCreateDTO(product.getKey(), product.getValue()))
                         .toList()

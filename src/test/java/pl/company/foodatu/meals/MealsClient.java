@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import pl.company.foodatu.common.utils.RestResponsePage;
 import pl.company.foodatu.meals.dto.MealCreateDTO;
-import pl.company.foodatu.meals.dto.MealResponse;
+import pl.company.foodatu.meals.dto.RestMealResponse;
 import pl.company.foodatu.meals.dto.StdProductCreateDTO;
 import pl.company.foodatu.meals.dto.StdProductResponse;
 
@@ -61,34 +61,34 @@ public class MealsClient {
                 BASE_PATH + "/std-products", HttpMethod.POST, entity, Object.class);
     }
 
-    public ResponseEntity<RestResponsePage<MealResponse>> getMeals() {
+    public ResponseEntity<RestResponsePage<RestMealResponse>> getMeals() {
         return getMeals(new HashMap<>());
     }
 
-    public ResponseEntity<RestResponsePage<MealResponse>> getMeals(Map<String, String> params) {
+    public ResponseEntity<RestResponsePage<RestMealResponse>> getMeals(Map<String, String> params) {
         String urlTemplate = UriComponentsBuilder.fromHttpUrl(BASE_PATH + "/meals")
                 .queryParamIfPresent("page", Optional.ofNullable(params.get("page")))
                 .queryParamIfPresent("size", Optional.ofNullable(params.get("size")))
                 .encode()
                 .toUriString();
         return restTemplate.exchange(
-                urlTemplate, HttpMethod.GET, null, new ParameterizedTypeReference<RestResponsePage<MealResponse>>() {
+                urlTemplate, HttpMethod.GET, null, new ParameterizedTypeReference<RestResponsePage<RestMealResponse>>() {
                 }, params);
     }
 
-    public ResponseEntity<MealResponse> getMeal(UUID id) {
+    public ResponseEntity<RestMealResponse> getMeal(UUID id) {
         String urlTemplate = UriComponentsBuilder.fromHttpUrl(BASE_PATH + "/meals/" + id)
                 .encode()
                 .toUriString();
         return restTemplate.exchange(
-                urlTemplate, HttpMethod.GET, null, new ParameterizedTypeReference<MealResponse>() {
+                urlTemplate, HttpMethod.GET, null, new ParameterizedTypeReference<RestMealResponse>() {
                 }, new HashMap<>());
     }
 
-    public ResponseEntity<MealResponse> addMeal(MealCreateDTO mealCreateDTO) {
+    public ResponseEntity<RestMealResponse> addMeal(MealCreateDTO mealCreateDTO) {
         HttpEntity<MealCreateDTO> entity = new HttpEntity<>(mealCreateDTO);
         return restTemplate.exchange(
-                BASE_PATH + "/meals", HttpMethod.POST, entity, MealResponse.class);
+                BASE_PATH + "/meals", HttpMethod.POST, entity, RestMealResponse.class);
     }
 
     public ResponseEntity<Object> addMeal(String mealCreateDTO) {
